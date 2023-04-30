@@ -1,26 +1,74 @@
 import './App.css';
 import {
-  createBrowserRouter,
+  createHashRouter,
   RouterProvider
 } from "react-router-dom";
-import Root from "./routes/root";
+import { LandingScreen } from './screens/LandingScreen/LandingScreen';
+//import { EventsRankingScreen } from './screens/EventsRankingScreen/EventsRankingScreen';
+//import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/OrganizersRankingScreen';
+//import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
+import { createTheme, ThemeProvider} from '@mui/material/styles';
+//import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
-    element: <Root />
-  }, {
-    path: '/dashboard',
-    element: <Root /> // replace with Dashboard page
-  }, {
-    path: '/users',
-    element: <Root /> // replace with Users page
+    element: <LandingScreen />
   }
-])
+]);
+
+/*
+, {
+    path: '/events',
+    element: <EventsRankingScreen />
+  }, {
+    path: '/organizers',
+    element: <OrganizersRankingScreen />
+  }, {
+    path: '/profile',
+    element: <ProfileScreen />
+  }, {
+    path: '/events/:eventId',
+    element: <EventDetailScreen />
+  }
+*/
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#61309b',
+      contrastText: '#fff',
+    },
+    secondary: {
+      main: '#8978C7',
+      contrastText: '#fff',
+    },
+    third: {
+        main: '#beb4e8',
+        contrastText: '#fff',
+    },
+    fourth: {
+      main: '#94a5dd',
+      contrastText: '#fff',
+    },
+  },
+  typography: {
+    button: {
+      textTransform: 'none'
+    },
+    fontFamily: 'Urbanist',
+    fontSize: 16,
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+  }
+});
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <ThemeProvider theme={theme}>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 }
 
