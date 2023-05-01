@@ -4,32 +4,32 @@ import {
   RouterProvider
 } from "react-router-dom";
 import { LandingScreen } from './screens/LandingScreen/LandingScreen';
-//import { EventsRankingScreen } from './screens/EventsRankingScreen/EventsRankingScreen';
+import { EventsRankingScreen } from './screens/EventsRankingScreen/EventsRankingScreen';
 //import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/OrganizersRankingScreen';
 //import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { createTheme, ThemeProvider} from '@mui/material/styles';
-//import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
+import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
 
 const router = createHashRouter([
   {
     path: '/',
     element: <LandingScreen />
+  }, {
+    path: '/events',
+    element: <EventsRankingScreen />
+  }, {
+    path: '/events/:eventId',
+    element: <EventDetailScreen />
   }
 ]);
 
 /*
 , {
-    path: '/events',
-    element: <EventsRankingScreen />
-  }, {
     path: '/organizers',
     element: <OrganizersRankingScreen />
   }, {
     path: '/profile',
     element: <ProfileScreen />
-  }, {
-    path: '/events/:eventId',
-    element: <EventDetailScreen />
   }
 */
 

@@ -23,7 +23,7 @@ export const LandingScreen = () => {
         setIsLoading(true);
         console.log("Name", name, "Password", password);
         if(name === "admin1" && password === "pass1") {
-            //navigate
+            navigate("/events");
             console.log("OK");
         } else {
             Swal.fire({
