@@ -11,6 +11,10 @@ import {
   Button,
   CircularProgress,
   Modal,
+  CardContent,
+  CardActions,
+  Card,
+  Stack,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
@@ -35,10 +39,9 @@ import Marker from "../../components/MapMarker";
 import parse from "html-react-parser";
 import { State } from "../../components/State";
 import { useNavigate } from "react-router-dom";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Swal from 'sweetalert2';
 import { getOrganizer } from "../../services/organizerService";
+import { suspendEvent, unsuspendEvent } from "../../services/eventService";
 
 export function EventDetailScreen() {
   const { eventId } = useParams();
@@ -62,25 +65,89 @@ export function EventDetailScreen() {
     setMapReady(true);
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      getComplaintByEvent(eventId).then((resp) => {
-        console.log("complaints", resp);
-        setComplaints(resp)
+  async function fetchData() {
+    getComplaintByEvent(eventId).then((resp) => {
+      console.log("complaints", resp);
+      setComplaints(resp);
+    });
+    getEvent(eventId).then((res) => {
+      setEvent(res.data);
+      getOrganizer(res.data.organizer).then((resp) => {
+        setOrganizer(resp.data);
+        console.log("Organizer",resp.data);
       });
-      getEvent(eventId).then((res) => {
-        setEvent(res.data);
-      });
-    }
+      console.log("resp", res.data)
+    });
+  }
+
+  useEffect( () => {
     fetchData();
   }, []);
 
   /*useEffect(() => {
     async function fetchData() {
-      getOrganizer(complaints.organizer_id).then((res) => setOrganizer(res.data));
+      
     }
     fetchData();
   }, [event]);*/
+
+  const handleSuspendEvent = async () => {
+    setIsLoading(true);
+    await suspendEvent(eventId)
+      .then((result) => {
+        setIsLoading(false);
+        Swal.fire({
+          title: '¡Éxito!',
+          text: 'El evento se ha suspendido correctamente',
+          icon: 'success',
+          confirmButtonColor: 'green',
+        }).then(function() {
+          navigate("/events");
+        });
+        console.log("response", result);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        let errorText = "Ocurrió un error."
+        errorText = errorText.concat(` ${error.response.data.detail}`);
+        Swal.fire({
+          title: '¡Error!',
+          text: errorText,
+          icon: 'error',
+          confirmButtonColor: 'red',
+        });
+        console.log("publish error", error);
+      });
+  }
+
+  const handleUnsuspendEvent = async () => {
+    setIsLoading(true);
+    await unsuspendEvent(eventId)
+      .then((result) => {
+        setIsLoading(false);
+        Swal.fire({
+          title: '¡Éxito!',
+          text: 'El evento se ha desuspendido correctamente',
+          icon: 'success',
+          confirmButtonColor: 'green',
+        }).then(function() {
+          navigate("/events");
+        });
+        console.log("response", result);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        let errorText = "Ocurrió un error."
+        errorText = errorText.concat(` ${error.response.data.detail}`);
+        Swal.fire({
+          title: '¡Error!',
+          text: errorText,
+          icon: 'error',
+          confirmButtonColor: 'red',
+        });
+        console.log("publish error", error);
+      });
+  }
 
   const prevImagePage = () => {
     if (imagePage !== 0) {
@@ -113,6 +180,39 @@ export function EventDetailScreen() {
           >
             <Box sx={{ display: "flex" , marginLeft: 3, paddingTop: 3}}>
               <Grid>
+                <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
+                  <State state={event.state}></State>
+                </Grid>
+                <Grid mt={5} mb={5} mr={3}>
+                  {organizer && (
+                  <Card variant="outlined" sx={{backgroundColor: "#f3f1fc"}}>
+                    <CardContent>
+                      <Stack direction="row" spacing={2}>
+                        <Stack>
+                          <Typography>
+                            Organizador
+                          </Typography>
+                          <Avatar alt="organizador" src={organizer.profile_picture} sx={{ width: 100 , height: 100, marginTop: 2 }}/>
+                        </Stack>
+                        <Stack alignContent={"center"}>
+                          <Typography >
+                            {organizer.first_name} {organizer.last_name} - {organizer.profession}
+                          </Typography>
+                          <Typography sx={{marginTop: 2}}>
+                            Sobre mi
+                          </Typography>
+                          <Typography>
+                            {organizer.about_me}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    </CardContent>
+                    <CardActions>
+                      <Button size="large" onClick={() => navigate(`/profile/${organizer.id}`)}>Ver perfil</Button>
+                    </CardActions>
+                  </Card>
+                  )}
+                </Grid>
                 <Grid mt={5} mb={5}>
                   <Typography
                     variant="h6"
@@ -120,6 +220,9 @@ export function EventDetailScreen() {
                   >
                     <strong>Denuncias</strong>
                   </Typography>
+                  {complaints.length === 0 && (
+                    <strong>Vacio</strong>
+                  )}
                   {complaints.map((complaint, idx) => (
                     <Accordion style={{ margin: 10 }}>
                       <AccordionSummary
@@ -139,6 +242,29 @@ export function EventDetailScreen() {
                     </Accordion>
                   ))}
                 </Grid>
+                <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
+                  {!isLoading && event.state !== "Suspendido" && (
+                    <Button
+                      variant="contained"
+                      size="large"
+                      color="error"
+                      onClick={handleSuspendEvent}
+                    >
+                      Suspender Evento
+                    </Button>
+                  )}
+                  {!isLoading && event.state === "Suspendido" && (
+                    <Button
+                      variant="contained"
+                      size="large"
+                      color="error"
+                      onClick={handleUnsuspendEvent}
+                    >
+                      Desuspender Evento
+                    </Button>
+                  )}
+                  {isLoading && <CircularProgress color="primary" />}
+                </Grid>
                 <Grid>
                   <div
                     style={{ display: "flex", justifyContent: "space-between" }}
@@ -149,7 +275,6 @@ export function EventDetailScreen() {
                     >
                       <strong>Fecha:</strong> {event.date}
                     </Typography>
-                    <State state={event.state}></State>
                   </div>
                   <Typography
                     variant="h6"

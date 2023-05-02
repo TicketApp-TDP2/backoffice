@@ -29,7 +29,7 @@ export async function getComplaintByEvent(event_id) {
     const complaints = [];
     response.data.forEach(async (complaint, idx) => {
         const complainer = await axios.get(`/users/${complaint.complainer_id}`);
-        const complainer_name =`${complainer.first_name} ${complainer.last_name}`;
+        const complainer_name =`${complainer.data.first_name} ${complainer.data.last_name}`;
         const newComplaint = {
             event_id: complaint.event_id,
             complainer_id: complaint.complainer_id,
@@ -42,4 +42,12 @@ export async function getComplaintByEvent(event_id) {
         complaints[idx] = newComplaint;
     });
     return complaints;
+}
+
+export async function suspendEvent(event_id) {
+    return await axios.put(`/events/${event_id}/suspend`);
+}
+
+export async function unsuspendEvent(event_id) {
+    return await axios.put(`/events/${event_id}/unsuspend`);
 }

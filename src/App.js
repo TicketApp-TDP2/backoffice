@@ -6,7 +6,7 @@ import {
 import { LandingScreen } from './screens/LandingScreen/LandingScreen';
 import { EventsRankingScreen } from './screens/EventsRankingScreen/EventsRankingScreen';
 //import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/OrganizersRankingScreen';
-//import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
+import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { createTheme, ThemeProvider} from '@mui/material/styles';
 import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
 
@@ -20,6 +20,9 @@ const router = createHashRouter([
   }, {
     path: '/events/:eventId',
     element: <EventDetailScreen />
+  }, {
+    path: '/profile/:profileId',
+    element: <ProfileScreen />
   }
 ]);
 
@@ -27,9 +30,6 @@ const router = createHashRouter([
 , {
     path: '/organizers',
     element: <OrganizersRankingScreen />
-  }, {
-    path: '/profile',
-    element: <ProfileScreen />
   }
 */
 
