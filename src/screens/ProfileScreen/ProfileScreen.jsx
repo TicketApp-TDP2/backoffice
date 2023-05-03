@@ -18,22 +18,23 @@ export const ProfileScreen = () => {
     const navigate = useNavigate();
 
     
-    async function fetchData() {
-      getOrganizer(profileId).then((resp) => {
-          setOrganizer(resp.data);
-          console.log("Organizer",resp.data);
-      });
-      setIsLoading(true);
-      getComplaintByOrganizer(profileId).then((resp) => {
-        setComplaints(resp);
-        console.log("Complaints",resp);
-      });
-      setIsLoading(false);
-    }
+    
     
     useEffect( () => {
-        fetchData();
-    }, []);
+      async function fetchData() {
+        getOrganizer(profileId).then((resp) => {
+            setOrganizer(resp.data);
+            console.log("Organizer",resp.data);
+        });
+        setIsLoading(true);
+        getComplaintByOrganizer(profileId).then((resp) => {
+          setComplaints(resp);
+          console.log("Complaints",resp);
+        });
+        setIsLoading(false);
+      }
+      fetchData();
+    }, [profileId]);
 
     const handleSuspendOrganizer = async () => {
         setIsLoadingButton(true);
