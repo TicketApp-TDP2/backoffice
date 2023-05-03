@@ -25,8 +25,8 @@ export const ProfileScreen = () => {
       });
       setIsLoading(true);
       getComplaintByOrganizer(profileId).then((resp) => {
-        setComplaints(resp.data);
-        console.log("Complaints",resp.data);
+        setComplaints(resp);
+        console.log("Complaints",resp);
       });
       setIsLoading(false);
     }
@@ -109,7 +109,7 @@ export const ProfileScreen = () => {
             </Grid>
             <Divider variant="middle"/>
             <Grid container justifyContent="flex-end" sx={{paddingRight: 3, paddingTop: 3}}>
-              <ProfileState state={organizer.state} />
+              <ProfileState state={organizer.suspended} />
             </Grid>
             <Box sx={{ display: 'flex' }}>
               <Typography variant="h5" sx={{ marginRight: 2, marginLeft: 2, marginTop: 2 }}>{organizer.profession}</Typography>
