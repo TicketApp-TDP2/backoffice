@@ -34,9 +34,9 @@ import {
   
     const data = [
       { name: "Ranking Eventos", icon: <EventNoteIcon />, navigate: '/events' },
+      { name: "Ranking Organizadores", icon: <AccountCircleIcon />, navigate: '/organizers' },
       { name: "Salir", icon: <LogoutIcon />, navigate: '/' },
     ];
-    /*{ name: "Ranking Organizadores", icon: <AccountCircleIcon />, navigate: '/organizers' }*/
   
     const getList = () => (
       <div style={{ width: 250 }}>

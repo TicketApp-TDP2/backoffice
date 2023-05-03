@@ -5,7 +5,7 @@ import {
 } from "react-router-dom";
 import { LandingScreen } from './screens/LandingScreen/LandingScreen';
 import { EventsRankingScreen } from './screens/EventsRankingScreen/EventsRankingScreen';
-//import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/OrganizersRankingScreen';
+import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/OrganizersRankingScreen';
 import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { createTheme, ThemeProvider} from '@mui/material/styles';
 import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
@@ -23,15 +23,11 @@ const router = createHashRouter([
   }, {
     path: '/profile/:profileId',
     element: <ProfileScreen />
-  }
-]);
-
-/*
-, {
+  }, {
     path: '/organizers',
     element: <OrganizersRankingScreen />
   }
-*/
+]);
 
 const theme = createTheme({
   palette: {

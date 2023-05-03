@@ -26,23 +26,29 @@ export async function getEvent(id) {
 
 export async function getComplaintByEvent(event_id) {
     const response = await axios.get(`/complaints/event/${event_id}`);
-    const complaints = [];
-    response.data.forEach(async (complaint, idx) => {
+    const complaints = response.data;
+    for (let index = 0; index < complaints.length; index += 1) {
+        const complaint = complaints[index];
         const complainer = await axios.get(`/users/${complaint.complainer_id}`);
         const complainer_name =`${complainer.data.first_name} ${complainer.data.last_name}`;
-        const newComplaint = {
-            event_id: complaint.event_id,
-            complainer_id: complaint.complainer_id,
-            type: complaint.type,
-            description: complaint.description,
-            id: complaint.id,
-            organizer_id: complaint.organizer_id,
-            complainer_name: complainer_name,
-        }
-        complaints[idx] = newComplaint;
-    });
+        complaints[index].complainer_name = complainer_name;
+    }
     return complaints;
 }
+
+/*export async function getComplaintByOrganizer(organizer_id) {
+    const response = await axios.get(`/complaints/organizer/${organizer_id}`);
+    const complaints = response.data;
+    for (let index = 0; index < complaints.length; index += 1) {
+        const complaint = complaints[index];
+        const complainer = await axios.get(`/users/${complaint.complainer_id}`);
+        const event = await axios.get(`/events/${complaint.event_id}`);
+        const complainer_name =`${complainer.data.first_name} ${complainer.data.last_name}`;
+        complaints[index].complainer = complainer_name;
+        complaints[index].event = event.data.name;
+    }
+    return complaints;
+} */
 
 export async function suspendEvent(event_id) {
     return await axios.put(`/events/${event_id}/suspend`);

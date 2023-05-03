@@ -19,8 +19,8 @@ import LastPageIcon from "@mui/icons-material/LastPage";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Link } from "@mui/material";
-import { State } from "./State";
-import { getComplaintRankingByEvents } from "../services/eventService";
+import { ProfileState } from "./ProfileState";
+import { getComplaintRankingByOrganizer } from "../services/organizerService";
 import { CircularProgress } from "@mui/material";
 
 function TablePaginationActions(props) {
@@ -93,21 +93,21 @@ TablePaginationActions.propTypes = {
 
 const rowsPerPage = 10;
 
-export const EventsTable = () => {
+export const OrganizersTable = () => {
   const [page, setPage] = React.useState(0);
   const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
-      setIsLoading(true);
-      getComplaintRankingByEvents().then((res) => {
-          console.log("Response", res);
-          setRows(res);
-          setIsLoading(false);
-      });
+        setIsLoading(true);
+        getComplaintRankingByOrganizer().then((res) => {
+            console.log("Response Table", res);
+            setRows(res);
+            setIsLoading(false);
+        });
     }
     fetchData();
   }, []);
@@ -131,14 +131,14 @@ export const EventsTable = () => {
             marginTop: 50,
           }}
         >
-          No hay eventos con denuncias registrados
+          No hay organizadores con denuncias registrados
         </Paper>
       </Box>
     );
   }*/
 
-  return (
-    <>
+  return ( 
+  <>
     {isLoading && (
       <Box sx={{ display: 'flex', justifyContent: "center", marginTop: 4 }}>
         <CircularProgress color="primary" />
@@ -154,71 +154,69 @@ export const EventsTable = () => {
                 marginTop: 50,
             }}
             >
-            No hay eventos con denuncias registrados
+            No hay organizadores con denuncias registrados
             </Paper>
       </Box>
     )}
     {!isLoading && rows.length > 0 && (
-      <TableContainer
+        <TableContainer
         component={Paper}
         sx={{
-          borderRadius: 4,
+            borderRadius: 4,
         }}
-      >
-        <Table
-          sx={{
-            minWidth: 500,
-          }}
-          aria-label="custom pagination table"
         >
-          <TableHead>
+        <Table
+            sx={{
+            minWidth: 500,
+            }}
+            aria-label="custom pagination table"
+        >
+            <TableHead>
             <TableRow>
-              <TableCell style={{ width: "20%" }}>Evento</TableCell>
-              <TableCell style={{ width: "20%" }} align="center">Organizador</TableCell>
-              <TableCell style={{ width: "20%" }} align="center">Cantidad de denuncias</TableCell>
-              <TableCell style={{ width: "30%" }} align="center">Estado</TableCell>
+                <TableCell style={{ width: "20%" }} align="center">Organizador</TableCell>
+                <TableCell style={{ width: "20%" }} align="center">Cantidad de denuncias</TableCell>
+                <TableCell style={{ width: "30%" }} align="center">Estado</TableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
+            </TableHead>
+            <TableBody>
             {(rowsPerPage > 0
-              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : rows
+                ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : rows
             ).map((row) => (
-              <TableRow
-                key={row.event}
+                <TableRow
+                key={row.organizer}
                 sx={{ backgroundColor: "#f3f1fc" }}
                 hover
                 selected
-              >
+                >
                 <TableCell sx={{ fontWeight: "bold" }}>
-                  <Button
+                    <Button
                     onClick={() => {
-                      navigate(`/events/${row.event_id}`);
+                        navigate(`/profile/${row.organizer_id}`);
                     }}
                     underline="hover"
-                  >
-                    {row.event}
-                  </Button>
+                    >
+                    {row.organizer}
+                    </Button>
                 </TableCell>
-                <TableCell align="center">{row.organizer}</TableCell>
                 <TableCell align="center">{row.complaints}</TableCell>
-                <TableCell align="center"><State state={row.state} /></TableCell>
-              </TableRow>
+                <TableCell align="center"><ProfileState state={row.state} /></TableCell>
+                </TableRow>
             ))}
 
             {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableRow style={{ height: 53 * emptyRows }}>
                 <TableCell colSpan={6} sx={{ backgroundColor: "#f3f1fc" }} />
-              </TableRow>
+                </TableRow>
             )}
-          </TableBody>
-          <TableFooter>
+            </TableBody>
+            <TableFooter>
             <TableRow>
-              <TableCell />
-              <TableCell />
-              <TableCell />
-              <TableCell />
-              <TablePagination
+                <TableCell />
+                <TableCell />
+                <TableCell />
+                <TableCell />
+                <TablePagination
                 count={rows.length}
                 onPageChange={handleChangePage}
                 page={page}
@@ -228,27 +226,27 @@ export const EventsTable = () => {
                 labelDisplayedRows={({ from, to, count }) => page + 1}
                 labelRowsPerPage={null}
                 nextIconButtonProps={{
-                  "aria-label": "Next Page",
-                  style: {
+                    "aria-label": "Next Page",
+                    style: {
                     border: "2px solid",
                     borderRadius: "20%",
                     padding: "1px",
-                  },
+                    },
                 }}
                 backIconButtonProps={{
-                  "aria-label": "Previous Page",
-                  style: {
+                    "aria-label": "Previous Page",
+                    style: {
                     border: "2px solid",
                     borderRadius: "20%",
                     padding: "1px",
-                  },
+                    },
                 }}
-              />
+                />
             </TableRow>
-          </TableFooter>
+            </TableFooter>
         </Table>
-      </TableContainer>
-    )}
+        </TableContainer>
+        )}
     </>
   );
 };
