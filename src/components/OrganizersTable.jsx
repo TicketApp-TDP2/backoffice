@@ -173,9 +173,9 @@ export const OrganizersTable = () => {
         >
             <TableHead>
             <TableRow>
-                <TableCell style={{ width: "20%" }} align="center">Organizador</TableCell>
-                <TableCell style={{ width: "20%" }} align="center">Cantidad de denuncias</TableCell>
-                <TableCell style={{ width: "30%" }} align="center">Estado</TableCell>
+                <TableCell style={{ width: "33%" }}>Organizador</TableCell>
+                <TableCell style={{ width: "33%" }} align="center">Cantidad de denuncias</TableCell>
+                <TableCell style={{ width: "33%" }} align="center">Estado</TableCell>
             </TableRow>
             </TableHead>
             <TableBody>
@@ -212,8 +212,6 @@ export const OrganizersTable = () => {
             </TableBody>
             <TableFooter>
             <TableRow>
-                <TableCell />
-                <TableCell />
                 <TableCell />
                 <TableCell />
                 <TablePagination

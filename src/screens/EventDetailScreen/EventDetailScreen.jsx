@@ -52,6 +52,7 @@ export function EventDetailScreen() {
 
   const mapRef = useRef(null);
   const [mapReady, setMapReady] = useState(false);
+  const [isLoadingSuspensionButton, setIsLoadingSuspensionButton] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -81,21 +82,16 @@ export function EventDetailScreen() {
   }
 
   useEffect( () => {
+    setIsLoading(true);
     fetchData();
+    setIsLoading(false);
   }, []);
 
-  /*useEffect(() => {
-    async function fetchData() {
-      
-    }
-    fetchData();
-  }, [event]);*/
-
   const handleSuspendEvent = async () => {
-    setIsLoading(true);
+    setIsLoadingSuspensionButton(true);
     await suspendEvent(eventId)
       .then((result) => {
-        setIsLoading(false);
+        setIsLoadingSuspensionButton(false);
         Swal.fire({
           title: '¡Éxito!',
           text: 'El evento se ha suspendido correctamente',
@@ -107,7 +103,7 @@ export function EventDetailScreen() {
         console.log("response", result);
       })
       .catch((error) => {
-        setIsLoading(false);
+        setIsLoadingSuspensionButton(false);
         let errorText = "Ocurrió un error."
         errorText = errorText.concat(` ${error.response.data.detail}`);
         Swal.fire({
@@ -121,10 +117,10 @@ export function EventDetailScreen() {
   }
 
   const handleUnsuspendEvent = async () => {
-    setIsLoading(true);
+    setIsLoadingSuspensionButton(true);
     await unsuspendEvent(eventId)
       .then((result) => {
-        setIsLoading(false);
+        setIsLoadingSuspensionButton(false);
         Swal.fire({
           title: '¡Éxito!',
           text: 'El evento se ha desuspendido correctamente',
@@ -136,7 +132,7 @@ export function EventDetailScreen() {
         console.log("response", result);
       })
       .catch((error) => {
-        setIsLoading(false);
+        setIsLoadingSuspensionButton(false);
         let errorText = "Ocurrió un error."
         errorText = errorText.concat(` ${error.response.data.detail}`);
         Swal.fire({
@@ -164,7 +160,13 @@ export function EventDetailScreen() {
   return (
     <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
       <SideBar />
-      {event && (
+      {isLoading && (
+        <Box sx={{ display: 'flex', justifyContent: "center" }}>
+          <CircularProgress color="primary" />
+          <Typography>HOLAAAAAAAAAAAAAAAA</Typography>
+        </Box>
+      )}
+      {event && !isLoading &&(
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid item style={{ flexGrow: "1" }}>
             <Typography variant="h3" sx={{ marginRight: 2 }}>
@@ -243,7 +245,7 @@ export function EventDetailScreen() {
                   ))}
                 </Grid>
                 <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
-                  {!isLoading && event.state !== "Suspendido" && (
+                  {!isLoadingSuspensionButton && event.state !== "Suspendido" && (
                     <Button
                       variant="contained"
                       size="large"
@@ -253,7 +255,7 @@ export function EventDetailScreen() {
                       Suspender Evento
                     </Button>
                   )}
-                  {!isLoading && event.state === "Suspendido" && (
+                  {!isLoadingSuspensionButton && event.state === "Suspendido" && (
                     <Button
                       variant="contained"
                       size="large"
@@ -263,7 +265,7 @@ export function EventDetailScreen() {
                       Desuspender Evento
                     </Button>
                   )}
-                  {isLoading && <CircularProgress color="primary" />}
+                  {isLoadingSuspensionButton && <CircularProgress color="primary" />}
                 </Grid>
                 <Grid>
                   <div

@@ -1,3 +1,5 @@
+import { Grid } from "@mui/material";
+
 export const State = (props) => {
     const { state } = props;
     var color = "black";
@@ -13,20 +15,22 @@ export const State = (props) => {
       color = "#ff7961";
     }
     return (
-      <div
-        style={{
-          backgroundColor: color,
-          color: "black",
-          padding: "5px",
-          borderRadius: "100px",
-          width: "100px",
-          textAlign: "center",
-          fontWeight: "bold",
-          alignSelf: "center",
-        }}
-      >
-        {state}
-      </div>
+      <Grid container justifyContent={"center"}>
+        <div
+          style={{
+            backgroundColor: color,
+            color: "black",
+            padding: "5px",
+            borderRadius: "100px",
+            width: "100px",
+            textAlign: "center",
+            fontWeight: "bold",
+            alignSelf: "center",
+          }}
+        >
+          {state}
+        </div>
+      </Grid>
     );
   };
   

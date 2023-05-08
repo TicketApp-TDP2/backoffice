@@ -173,10 +173,10 @@ export const EventsTable = () => {
         >
           <TableHead>
             <TableRow>
-              <TableCell style={{ width: "20%" }}>Evento</TableCell>
-              <TableCell style={{ width: "20%" }} align="center">Organizador</TableCell>
-              <TableCell style={{ width: "20%" }} align="center">Cantidad de denuncias</TableCell>
-              <TableCell style={{ width: "30%" }} align="center">Estado</TableCell>
+              <TableCell style={{ width: "25%" }}>Evento</TableCell>
+              <TableCell style={{ width: "25%" }} align="center">Organizador</TableCell>
+              <TableCell style={{ width: "25%" }} align="center">Cantidad de denuncias</TableCell>
+              <TableCell style={{ width: "25%" }} align="center">Estado</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -214,7 +214,6 @@ export const EventsTable = () => {
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell />
               <TableCell />
               <TableCell />
               <TableCell />
