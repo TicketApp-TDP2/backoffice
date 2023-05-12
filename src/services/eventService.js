@@ -39,3 +39,13 @@ export async function suspendEvent(event_id) {
 export async function unsuspendEvent(event_id) {
     return await axios.put(`/events/${event_id}/unsuspend`);
 }
+
+export async function getUsersEnrolled(eventId) {
+    let users = [];
+    const bookings = await axios.get(`bookings/event/${eventId}`);
+    for (const booking of bookings.data) {
+        users.push(booking.reserver_id);
+    }
+
+    return users;
+}
