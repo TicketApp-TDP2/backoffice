@@ -17,8 +17,8 @@ import {
   Stack,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import React, { useEffect, useRef, useState } from "react";
-import { getComplaintByEvent, getEvent } from "../../services/eventService";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {getComplaintByEvent, getEvent, getUsersEnrolled} from "../../services/eventService";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Timeline from "@mui/lab/Timeline";
@@ -42,6 +42,14 @@ import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import { getOrganizer } from "../../services/organizerService";
 import { suspendEvent, unsuspendEvent } from "../../services/eventService";
+import {
+  cancelScheduledNotificationsForEvent,
+  rescheduleNotificationsForEvent,
+  sendNotification
+} from "../../services/pushService";
+import {MobileNotificationsContext} from "../../index";
+import { ref } from 'firebase/database';
+import moment from "moment/moment";
 
 export function EventDetailScreen() {
   const { eventId } = useParams();
@@ -55,6 +63,8 @@ export function EventDetailScreen() {
   const [isLoadingSuspensionButton, setIsLoadingSuspensionButton] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const notificationsContext = useContext(MobileNotificationsContext);
+
 
   /**
    * @description This function is called when the map is ready
@@ -87,6 +97,15 @@ export function EventDetailScreen() {
     setIsLoading(false);
   }, []);
 
+  const notifyUsers = async(action) => {
+    const title = "Información importante";
+    const body = `El evento ${event.name} ha sido ${action}.`;
+    const users = await getUsersEnrolled(event.id);
+    users.forEach((userId) => {
+      sendNotification(title, body, userId);
+    })
+  }
+
   const handleSuspendEvent = async () => {
     setIsLoadingSuspensionButton(true);
     await suspendEvent(eventId)
@@ -98,6 +117,8 @@ export function EventDetailScreen() {
           icon: 'success',
           confirmButtonColor: 'green',
         }).then(function() {
+          notifyUsers('suspendido');
+          cancelScheduledNotificationsForEvent(ref(notificationsContext.db), eventId);
           navigate("/events");
         });
         console.log("response", result);
@@ -116,6 +137,13 @@ export function EventDetailScreen() {
       });
   }
 
+  async function scheduleReminder() {
+    const eventStartTime = moment(event.date + ' ' + event.start_time);
+    const dayBeforeEvent = eventStartTime.subtract(1, 'days');
+    const sendAt = dayBeforeEvent.toString()
+    rescheduleNotificationsForEvent(ref(notificationsContext.db), event.id, sendAt, event.name)
+  }
+
   const handleUnsuspendEvent = async () => {
     setIsLoadingSuspensionButton(true);
     await unsuspendEvent(eventId)
@@ -127,6 +155,8 @@ export function EventDetailScreen() {
           icon: 'success',
           confirmButtonColor: 'green',
         }).then(function() {
+          notifyUsers('habilitado nuevamente');
+          scheduleReminder();
           navigate("/events");
         });
         console.log("response", result);
