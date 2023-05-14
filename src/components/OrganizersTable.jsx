@@ -21,7 +21,17 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import { ProfileState } from "./ProfileState";
 import { getComplaintRankingByOrganizer } from "../services/organizerService";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Grid, Typography, Divider, Modal } from "@mui/material";
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+
+const today = dayjs();
+const lastweek = today.subtract(7, 'day');
+console.log(today);
+console.log(lastweek);
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -97,13 +107,18 @@ export const OrganizersTable = () => {
   const [page, setPage] = React.useState(0);
   const [rows, setRows] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [initialDate, setInitialDate] = useState(lastweek);
+  const [finalDate, setFinalDate] = useState(today);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
         setIsLoading(true);
-        getComplaintRankingByOrganizer().then((res) => {
+        const start = initialDate.toISOString().substring(0, 10);
+        const end = finalDate.toISOString().substring(0, 10);
+        getComplaintRankingByOrganizer({ start, end }).then((res) => {
             console.log("Response Table", res);
             setRows(res);
             setIsLoading(false);
@@ -137,6 +152,99 @@ export const OrganizersTable = () => {
     );
   }*/
 
+  const handleFilter = async () => {
+    handleCloseModal();
+    setIsLoading(true);
+    const start = initialDate.toISOString().substring(0, 10);
+    const end = finalDate.toISOString().substring(0, 10);
+    getComplaintRankingByOrganizer(start, end).then((res) => {
+        console.log("Response", res);
+        setRows(res);
+        setIsLoading(false);
+    });
+}
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  }
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  }
+
+  const ModalFilter = () => {
+    return(
+    <>
+      <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
+        <IconButton aria-label="delete" color="primary" size="large" onClick={handleOpenModal}>
+          <FilterListIcon />
+        </IconButton>
+      </Grid>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 800,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Filtro por fecha
+          </Typography>
+          <Divider/>
+          <Grid container sx={{mt: 2}}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid item xs={1}>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  Desde:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+              <DatePicker
+                label="Fecha"
+                value={initialDate}
+                onChange={(newValue) => setInitialDate(newValue)}
+                format="DD/MM/YYYY"
+                disableFuture
+                sx={{width: "95%", pr:2}}
+                />
+              </Grid>
+              <Grid item xs={1}>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  Hasta:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+                <DatePicker
+                  label="Fecha"
+                  value={finalDate}
+                  onChange={(newValue) => setFinalDate(newValue)}
+                  format="DD/MM/YYYY"
+                  disableFuture
+                  sx={{width: "95%", pr:2}}
+                />
+              </Grid>
+            </LocalizationProvider>
+          </Grid>
+          <Box display="flex" justifyContent="flex-end" marginTop={2}>
+            <Button variant="contained" size="large" onClick={handleFilter} >
+              Filtrar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </>
+    );
+  }
+
   return ( 
   <>
     {isLoading && (
@@ -146,12 +254,13 @@ export const OrganizersTable = () => {
     )}
     {!isLoading && rows.length === 0 && (
         <Box style={{ height: "50em" }}>
+            <ModalFilter/>
             <Paper
             style={{
                 padding: 10,
                 margin: 10,
                 textAlign: "center",
-                marginTop: 50,
+                marginTop: 10,
             }}
             >
             No hay organizadores con denuncias registrados
@@ -159,6 +268,8 @@ export const OrganizersTable = () => {
       </Box>
     )}
     {!isLoading && rows.length > 0 && (
+      <>
+        <ModalFilter/>
         <TableContainer
         component={Paper}
         sx={{
@@ -244,6 +355,7 @@ export const OrganizersTable = () => {
             </TableFooter>
         </Table>
         </TableContainer>
+        </>
         )}
     </>
   );

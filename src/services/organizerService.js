@@ -4,8 +4,10 @@ export async function getOrganizer(id) {
     return await axios.get(`/organizers/${id}`);
 }
 
-export async function getComplaintRankingByOrganizer() {
-    let response = await axios.get(`/complaints/ranking/organizer`);
+export async function getComplaintRankingByOrganizer({ start, end }) {
+    const params = { start, end };
+    console.log("Params", params);
+    let response = await axios.get(`/complaints/ranking/organizer`, { params });
     let rankings = response.data;
     for (let index = 0; index < rankings.length; index += 1) {
         const ranking = rankings[index];

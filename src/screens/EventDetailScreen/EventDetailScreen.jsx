@@ -2,7 +2,6 @@ import SideBar from "../../components/SideBar";
 import {
   Avatar,
   Box,
-  Divider,
   Grid,
   ImageListItem,
   Paper,

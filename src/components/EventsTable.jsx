@@ -11,17 +11,26 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableHead from "@mui/material/TableHead";
 import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@mui/material";
+import { Button, IconButton, Grid, Typography, Divider, Modal } from "@mui/material";
 import { State } from "./State";
 import { getComplaintRankingByEvents } from "../services/eventService";
 import { CircularProgress } from "@mui/material";
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+
+const today = dayjs();
+const lastweek = today.subtract(7, 'day');
+console.log(today);
+console.log(lastweek);
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -97,13 +106,18 @@ export const EventsTable = () => {
   const [page, setPage] = React.useState(0);
   const [rows, setRows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const [initialDate, setInitialDate] = useState(lastweek);
+  const [finalDate, setFinalDate] = useState(today);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
       setIsLoading(true);
-      getComplaintRankingByEvents().then((res) => {
+      const start = initialDate.toISOString().substring(0, 10);
+      const end = finalDate.toISOString().substring(0, 10);
+      getComplaintRankingByEvents({ start, end }).then((res) => {
           console.log("Response", res);
           setRows(res);
           setIsLoading(false);
@@ -136,6 +150,99 @@ export const EventsTable = () => {
       </Box>
     );
   }*/
+  
+  const handleFilter = async () => {
+    handleCloseModal();
+    setIsLoading(true);
+    const start = initialDate.toISOString().substring(0, 10);
+    const end = finalDate.toISOString().substring(0, 10);
+    getComplaintRankingByEvents(start, end).then((res) => {
+        console.log("Response", res);
+        setRows(res);
+        setIsLoading(false);
+    });
+}
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  }
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  }
+
+  const ModalFilter = () => {
+    return(
+    <>
+      <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
+        <IconButton aria-label="delete" color="primary" size="large" onClick={handleOpenModal}>
+          <FilterListIcon />
+        </IconButton>
+      </Grid>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 800,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Filtro por fecha
+          </Typography>
+          <Divider/>
+          <Grid container sx={{mt: 2}}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid item xs={1}>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  Desde:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+              <DatePicker
+                label="Fecha"
+                value={initialDate}
+                onChange={(newValue) => setInitialDate(newValue)}
+                format="DD/MM/YYYY"
+                disableFuture
+                sx={{width: "95%", pr:2}}
+                />
+              </Grid>
+              <Grid item xs={1}>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  Hasta:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+                <DatePicker
+                  label="Fecha"
+                  value={finalDate}
+                  onChange={(newValue) => setFinalDate(newValue)}
+                  format="DD/MM/YYYY"
+                  disableFuture
+                  sx={{width: "95%", pr:2}}
+                />
+              </Grid>
+            </LocalizationProvider>
+          </Grid>
+          <Box display="flex" justifyContent="flex-end" marginTop={2}>
+            <Button variant="contained" size="large" onClick={handleFilter} >
+              Filtrar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </>
+    );
+  }
 
   return (
     <>
@@ -146,19 +253,22 @@ export const EventsTable = () => {
     )}
     {!isLoading && rows.length === 0 && (
         <Box style={{ height: "50em" }}>
-            <Paper
-            style={{
-                padding: 10,
-                margin: 10,
-                textAlign: "center",
-                marginTop: 50,
-            }}
-            >
+          <ModalFilter/>
+          <Paper
+          style={{
+              padding: 10,
+              margin: 10,
+              textAlign: "center",
+              marginTop: 10,
+          }}
+          >
             No hay eventos con denuncias registrados
-            </Paper>
+          </Paper>
       </Box>
     )}
     {!isLoading && rows.length > 0 && (
+      <>
+      <ModalFilter/>
       <TableContainer
         component={Paper}
         sx={{
@@ -247,6 +357,7 @@ export const EventsTable = () => {
           </TableFooter>
         </Table>
       </TableContainer>
+      </>
     )}
     </>
   );

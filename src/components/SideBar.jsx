@@ -6,12 +6,11 @@ import {
     Link,
   } from '@mui/material';
   import { styled } from '@mui/material/styles';
-  import { Link as RouterLink, useLocation } from 'react-router-dom';
+  import { Link as RouterLink } from 'react-router-dom';
   import EventNoteIcon from '@mui/icons-material/EventNote';
-  import BarChartIcon from '@mui/icons-material/BarChart';
   import AccountCircleIcon from '@mui/icons-material/AccountCircle';
   import LogoutIcon from '@mui/icons-material/Logout';
-  import { useContext, useState } from "react";
+  import { useState } from "react";
   
   
   const DRAWER_WIDTH = 225;
@@ -24,7 +23,6 @@ import {
   }));
   
   export default function SideBar() {
-    const location = useLocation();
   
     const [activeItem, setActiveItem] = useState(null);
   

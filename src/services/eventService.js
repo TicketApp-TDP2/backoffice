@@ -1,7 +1,10 @@
 import axios from "./axios";
 
-export async function getComplaintRankingByEvents() {
-    let response = await axios.get(`/complaints/ranking/event`);
+export async function getComplaintRankingByEvents({ start, end }) {
+    const params = { start, end };
+    console.log("Params", params);
+    let response = await axios.get(`/complaints/ranking/event`, { params });
+    console.log("Data", response.data)
     let rankings = response.data;
     for (let index = 0; index < rankings.length; index += 1) {
         const ranking = rankings[index];
