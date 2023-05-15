@@ -75,25 +75,24 @@ export function EventDetailScreen() {
     setMapReady(true);
   };
 
-  async function fetchData() {
-    getComplaintByEvent(eventId).then((resp) => {
-      console.log("complaints", resp);
-      setComplaints(resp);
-    });
-    getEvent(eventId).then((res) => {
-      setEvent(res.data);
-      getOrganizer(res.data.organizer).then((resp) => {
-        setOrganizer(resp.data);
-        console.log("Organizer",resp.data);
-      });
-      console.log("resp", res.data)
-    });
-  }
-
   useEffect( () => {
-    setIsLoading(true);
+    async function fetchData() {
+      setIsLoading(true);
+      getComplaintByEvent(eventId).then((resp) => {
+        console.log("complaints", resp);
+        setComplaints(resp);
+        setIsLoading(false);
+      });
+      getEvent(eventId).then((res) => {
+        setEvent(res.data);
+        getOrganizer(res.data.organizer).then((resp) => {
+          setOrganizer(resp.data);
+          console.log("Organizer",resp.data);
+        });
+        console.log("resp", res.data)
+      });
+    }
     fetchData();
-    setIsLoading(false);
   }, []);
 
   const notifyUsers = async(action) => {
@@ -189,13 +188,7 @@ export function EventDetailScreen() {
   return (
     <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
       <SideBar />
-      {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: "center" }}>
-          <CircularProgress color="primary" />
-          <Typography>HOLAAAAAAAAAAAAAAAA</Typography>
-        </Box>
-      )}
-      {event && !isLoading &&(
+      {event && (
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid item style={{ flexGrow: "1" }}>
             <Typography variant="h3" sx={{ marginRight: 2 }}>
@@ -203,272 +196,286 @@ export function EventDetailScreen() {
             </Typography>
             <hr />
           </Grid>
-          <Paper
-            style={{
-              backgroundColor: "white",
-              borderRadius: 20,
-            }}
+          {isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: "center", marginTop: 5 }}>
+              <CircularProgress color="primary" />
+            </Box>
+          )}
+          {!isLoading && (
+            <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
           >
-            <Box sx={{ display: "flex" , marginLeft: 3, paddingTop: 3}}>
-              <Grid>
-                <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
-                  <State state={event.state}></State>
-                </Grid>
-                <Grid mt={5} mb={5} mr={3}>
-                  {organizer && (
-                  <Card variant="outlined" sx={{backgroundColor: "#f3f1fc"}}>
-                    <CardContent>
-                      <Stack direction="row" spacing={2}>
-                        <Stack>
-                          <Typography>
-                            Organizador
-                          </Typography>
-                          <Avatar alt="organizador" src={organizer.profile_picture} sx={{ width: 100 , height: 100, marginTop: 2 }}/>
-                        </Stack>
-                        <Stack alignContent={"center"}>
-                          <Typography >
-                            {organizer.first_name} {organizer.last_name} - {organizer.profession}
-                          </Typography>
-                          <Typography sx={{marginTop: 2}}>
-                            Sobre mi
-                          </Typography>
-                          <Typography>
-                            {organizer.about_me}
-                          </Typography>
-                        </Stack>
-                      </Stack>
-                    </CardContent>
-                    <CardActions>
-                      <Button size="large" onClick={() => navigate(`/profile/${organizer.id}`)}>Ver perfil</Button>
-                    </CardActions>
-                  </Card>
-                  )}
-                </Grid>
-                <Grid mt={5} mb={5}>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2 }}
-                  >
-                    <strong>Denuncias</strong>
-                  </Typography>
-                  {complaints.length === 0 && (
-                    <strong>Vacio</strong>
-                  )}
-                  {complaints.map((complaint, idx) => (
-                    <Accordion style={{ margin: 10 }}>
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                        sx={{
-                          backgroundColor: "#8978C7",
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Typography color="white">Denuncia de {complaint.complainer_name}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ backgroundColor: "#e0e0e0" }}>
-                        <Typography>Motivo: {complaint.type}</Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
-                </Grid>
-                <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
-                  {!isLoadingSuspensionButton && event.state !== "Suspendido" && (
-                    <Button
-                      variant="contained"
-                      size="large"
-                      color="error"
-                      onClick={handleSuspendEvent}
-                    >
-                      Suspender Evento
-                    </Button>
-                  )}
-                  {!isLoadingSuspensionButton && event.state === "Suspendido" && (
-                    <Button
-                      variant="contained"
-                      size="large"
-                      color="error"
-                      onClick={handleUnsuspendEvent}
-                    >
-                      Desuspender Evento
-                    </Button>
-                  )}
-                  {isLoadingSuspensionButton && <CircularProgress color="primary" />}
-                </Grid>
+            <Paper
+              style={{
+                backgroundColor: "white",
+                borderRadius: 20,
+                width: "80%"
+              }}
+            >
+              <Box sx={{ display: "flex" , paddingTop: 3, justifyContent: "center", alignItems: "center" }}>
                 <Grid>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
+                  <Grid container justifyContent="flex-end" sx={{paddingRight: 3, paddingBottom: 3}}>
+                    <State state={event.state}></State>
+                  </Grid>
+                  <Grid >
+                    {organizer && (
+                    <Card variant="outlined" sx={{backgroundColor: "#f3f1fc"}}>
+                      <CardContent>
+                        <Stack direction="row" spacing={2}>
+                          <Stack>
+                            <Typography>
+                              Organizador
+                            </Typography>
+                            <Avatar alt="organizador" src={organizer.profile_picture} sx={{ width: 100 , height: 100, marginTop: 2 }}/>
+                          </Stack>
+                          <Stack alignContent={"center"}>
+                            <Typography >
+                              {organizer.first_name} {organizer.last_name} - {organizer.profession}
+                            </Typography>
+                            <Typography sx={{marginTop: 2}}>
+                              Sobre mi
+                            </Typography>
+                            <Typography>
+                              {organizer.about_me}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </CardContent>
+                      <CardActions>
+                        <Button size="large" onClick={() => navigate(`/profile/${organizer.id}`)}>Ver perfil</Button>
+                      </CardActions>
+                    </Card>
+                    )}
+                  </Grid>
+                  <Grid mt={5} mb={5}>
+                    <Typography
+                      variant="h6"
+                      sx={{ marginRight: 2, marginLeft: 2 }}
+                    >
+                      <strong>Denuncias</strong>
+                    </Typography>
+                    {complaints.length === 0 && (
+                      <strong>Vacio</strong>
+                    )}
+                    {complaints.map((complaint, idx) => (
+                      <Accordion style={{ margin: 10 }}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
+                          aria-controls="panel1a-content"
+                          id="panel1a-header"
+                          sx={{
+                            backgroundColor: "#8978C7",
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Typography color="white">Denuncia de {complaint.complainer_name}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ backgroundColor: "#e0e0e0" }}>
+                          <Typography>Motivo: {complaint.type}</Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </Grid>
+                  <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
+                    {!isLoadingSuspensionButton && event.state !== "Suspendido" && (
+                      <Button
+                        variant="contained"
+                        size="large"
+                        color="error"
+                        onClick={handleSuspendEvent}
+                      >
+                        Suspender Evento
+                      </Button>
+                    )}
+                    {!isLoadingSuspensionButton && event.state === "Suspendido" && (
+                      <Button
+                        variant="contained"
+                        size="large"
+                        color="error"
+                        onClick={handleUnsuspendEvent}
+                      >
+                        Desuspender Evento
+                      </Button>
+                    )}
+                    {isLoadingSuspensionButton && <CircularProgress color="primary" />}
+                  </Grid>
+                  <Grid>
+                    <div
+                      style={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{ marginRight: 2, marginLeft: 2, marginTop: 2 }}
+                      >
+                        <strong>Fecha:</strong> {event.date}
+                      </Typography>
+                    </div>
                     <Typography
                       variant="h6"
                       sx={{ marginRight: 2, marginLeft: 2, marginTop: 2 }}
                     >
-                      <strong>Fecha:</strong> {event.date}
+                      <strong>Vacantes:</strong> {event.vacants}
                     </Typography>
-                  </div>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2, marginTop: 2 }}
-                  >
-                    <strong>Vacantes:</strong> {event.vacants}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2, marginTop: 2 }}
-                  >
-                    <strong>Tipo:</strong> {event.type}
-                  </Typography>
-                </Grid>
-                <Grid mt={5}>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2 }}
-                  >
-                    <strong>Descripción</strong>
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ marginRight: 2, marginLeft: 2 }}
-                  >
-                    {parse(event.description)}
-                  </Typography>
-                </Grid>
-                <Grid mt={5}>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2 }}
-                  >
-                    <strong>Fotos</strong>
-                  </Typography>
-                  <Box
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      padding: 20,
-                    }}
-                  >
-                    {event.images.length > 3 && imagePage > 0 && (
-                      <Box>
-                        <ChevronLeftIcon onClick={() => prevImagePage()} />
-                      </Box>
-                    )}
-                    <ImageList cols={3} gap={20}>
-                      {event.images
-                        .slice(imagePage * 3, imagePage * 3 + 3)
-                        .map((item, idx) => (
-                          <ImageListItem key={idx}>
-                            <img
-                              src={`${item}?w=164&h=164&fit=crop&auto=format`}
-                              alt=""
-                              srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                              loading="lazy"
-                              style={{
-                                borderRadius: 10,
-                                width: 250,
-                                height: 250,
-                              }}
-                            />
-                          </ImageListItem>
-                        ))}
-                    </ImageList>
-                    {event.images.length > 3 &&
-                      event.images.length > 3 * (imagePage + 1) && (
+                    <Typography
+                      variant="h6"
+                      sx={{ marginRight: 2, marginLeft: 2, marginTop: 2 }}
+                    >
+                      <strong>Tipo:</strong> {event.type}
+                    </Typography>
+                  </Grid>
+                  <Grid mt={5}>
+                    <Typography
+                      variant="h6"
+                      sx={{ marginRight: 2, marginLeft: 2 }}
+                    >
+                      <strong>Descripción</strong>
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ marginRight: 2, marginLeft: 2 }}
+                    >
+                      {parse(event.description)}
+                    </Typography>
+                  </Grid>
+                  <Grid mt={5}>
+                    <Typography
+                      variant="h6"
+                      sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginRight: 2, marginLeft: 2 }}
+                    >
+                      <strong>Fotos</strong>
+                    </Typography>
+                    <Box
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: 20,
+                      }}
+                    >
+                      {event.images.length > 3 && imagePage > 0 && (
                         <Box>
-                          <ChevronRightIcon onClick={() => nextImagePage()} />
+                          <ChevronLeftIcon onClick={() => prevImagePage()} />
                         </Box>
                       )}
-                  </Box>
-                </Grid>
-                <Grid mt={5}>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2, marginBottom: 1 }}
-                  >
-                    <strong>Ubicación</strong>
-                  </Typography>
-                  <Grid sx={{paddingLeft: 2}}>
-                    <GoogleMap
-                      apiKey={process.env.REACT_APP_GEO_APIKEY}
-                      defaultCenter={{
-                        lat: event.location.lat,
-                        lng: event.location.lng,
-                      }}
-                      defaultZoom={15}
-                      mapMinHeight="50vh"
-                      onGoogleApiLoaded={onGoogleApiLoaded}
-                    >
-                      <Marker
-                        key={1}
-                        lat={event.location.lat}
-                        lng={event.location.lng}
-                        markerId={event.location.description}
-                        className="marker"
-                      />
-                    </GoogleMap>
+                      <ImageList cols={3} gap={20}>
+                        {event.images
+                          .slice(imagePage * 3, imagePage * 3 + 3)
+                          .map((item, idx) => (
+                            <ImageListItem key={idx}>
+                              <img
+                                src={`${item}?w=164&h=164&fit=crop&auto=format`}
+                                alt=""
+                                srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                loading="lazy"
+                                style={{
+                                  borderRadius: 10,
+                                  width: 250,
+                                  height: 250,
+                                }}
+                              />
+                            </ImageListItem>
+                          ))}
+                      </ImageList>
+                      {event.images.length > 3 &&
+                        event.images.length > 3 * (imagePage + 1) && (
+                          <Box>
+                            <ChevronRightIcon onClick={() => nextImagePage()} />
+                          </Box>
+                        )}
+                    </Box>
                   </Grid>
-                </Grid>
-                <Grid mt={5}>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2 }}
-                  >
-                    <strong>Agenda</strong>
-                  </Typography>
-                  {event.agenda.map((horario, idx) => (
-                    <Timeline
-                      sx={{
-                        [`& .${timelineOppositeContentClasses.root}`]: {
-                          flex: 0.2,
-                        },
-                      }}
+                  <Grid mt={5}>
+                    <Typography
+                      variant="h6"
+                      sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: 1 }}
                     >
-                      <TimelineItem>
-                        <TimelineOppositeContent color="textSecondary">
-                          {horario.time_init.substring(0, 5)} -{" "}
-                          {horario.time_end.substring(0, 5)}
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot />
-                          {event.agenda.length - 1 !== idx && (
-                            <TimelineConnector />
-                          )}
-                        </TimelineSeparator>
-                        <TimelineContent>{horario.title}</TimelineContent>
-                      </TimelineItem>
-                    </Timeline>
-                  ))}
-                </Grid>
-                <Grid mt={5} mb={5}>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginRight: 2, marginLeft: 2 }}
-                  >
-                    <strong>FAQs</strong>
-                  </Typography>
-                  {event.FAQ.map((faq, idx) => (
-                    <Accordion style={{ margin: 10 }}>
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
+                      <strong>Ubicación</strong>
+                    </Typography>
+                    <Grid sx={{paddingLeft: 2}}>
+                      <GoogleMap
+                        apiKey={process.env.REACT_APP_GEO_APIKEY}
+                        defaultCenter={{
+                          lat: event.location.lat,
+                          lng: event.location.lng,
+                        }}
+                        defaultZoom={15}
+                        mapMinHeight="50vh"
+                        onGoogleApiLoaded={onGoogleApiLoaded}
+                      >
+                        <Marker
+                          key={1}
+                          lat={event.location.lat}
+                          lng={event.location.lng}
+                          markerId={event.location.description}
+                          className="marker"
+                        />
+                      </GoogleMap>
+                    </Grid>
+                  </Grid>
+                  <Grid mt={5}>
+                    <Typography
+                      variant="h6"
+                      sx={{ display: "flex", justifyContent: "center", alignItems: "center", }}
+                    >
+                      <strong>Agenda</strong>
+                    </Typography>
+                    {event.agenda.map((horario, idx) => (
+                      <Timeline
                         sx={{
-                          backgroundColor: "#8978C7",
-                          borderRadius: 1,
+                          [`& .${timelineOppositeContentClasses.root}`]: {
+                            flex: 0.2,
+                          },
                         }}
                       >
-                        <Typography color="white">{faq.question}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ backgroundColor: "#e0e0e0" }}>
-                        <Typography>{faq.answer}</Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
+                        <TimelineItem>
+                          <TimelineOppositeContent color="textSecondary">
+                            {horario.time_init.substring(0, 5)} -{" "}
+                            {horario.time_end.substring(0, 5)}
+                          </TimelineOppositeContent>
+                          <TimelineSeparator>
+                            <TimelineDot />
+                            {event.agenda.length - 1 !== idx && (
+                              <TimelineConnector />
+                            )}
+                          </TimelineSeparator>
+                          <TimelineContent>{horario.title}</TimelineContent>
+                        </TimelineItem>
+                      </Timeline>
+                    ))}
+                  </Grid>
+                  <Grid mt={5} mb={5}>
+                    <Typography
+                      variant="h6"
+                      sx={{ display: "flex", justifyContent: "center", alignItems: "center", }}
+                    >
+                      <strong>FAQs</strong>
+                    </Typography>
+                    {event.FAQ.map((faq, idx) => (
+                      <Accordion style={{ margin: 10 }}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
+                          aria-controls="panel1a-content"
+                          id="panel1a-header"
+                          sx={{
+                            backgroundColor: "#8978C7",
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Typography color="white">{faq.question}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ backgroundColor: "#e0e0e0" }}>
+                          <Typography>{faq.answer}</Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </Grid>
                 </Grid>
-              </Grid>
-            </Box>
-          </Paper>
+              </Box>
+            </Paper>
+          </Box>
+          )}
         </Box>
       )}
     </Box>

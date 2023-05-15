@@ -157,7 +157,7 @@ export const OrganizersTable = () => {
     setIsLoading(true);
     const start = initialDate.toISOString().substring(0, 10);
     const end = finalDate.toISOString().substring(0, 10);
-    getComplaintRankingByOrganizer(start, end).then((res) => {
+    getComplaintRankingByOrganizer({ start, end }).then((res) => {
         console.log("Response", res);
         setRows(res);
         setIsLoading(false);

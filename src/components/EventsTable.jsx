@@ -156,7 +156,7 @@ export const EventsTable = () => {
     setIsLoading(true);
     const start = initialDate.toISOString().substring(0, 10);
     const end = finalDate.toISOString().substring(0, 10);
-    getComplaintRankingByEvents(start, end).then((res) => {
+    getComplaintRankingByEvents({ start, end }).then((res) => {
         console.log("Response", res);
         setRows(res);
         setIsLoading(false);
