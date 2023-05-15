@@ -211,7 +211,7 @@ export function EventDetailScreen() {
               style={{
                 backgroundColor: "white",
                 borderRadius: 20,
-                width: "80%"
+                width: "95%"
               }}
             >
               <Box sx={{ display: "flex" , paddingTop: 3, justifyContent: "center", alignItems: "center" }}>
