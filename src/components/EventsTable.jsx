@@ -107,18 +107,15 @@ export const EventsTable = () => {
   const [rows, setRows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
-  const [initialDate, setInitialDate] = useState(lastweek);
-  const [finalDate, setFinalDate] = useState(today);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
       setIsLoading(true);
-      const start = initialDate.toISOString().substring(0, 10);
-      const end = finalDate.toISOString().substring(0, 10);
+      const start = lastweek.toISOString().substring(0, 10);
+      const end = today.toISOString().substring(0, 10);
       getComplaintRankingByEvents({ start, end }).then((res) => {
-          console.log("Response", res);
           setRows(res);
           setIsLoading(false);
       });
@@ -134,35 +131,6 @@ export const EventsTable = () => {
     setPage(newPage);
   };
 
-  /*if (rows.length === 0) {
-    return (
-      <Box style={{ height: "50em" }}>
-        <Paper
-          style={{
-            padding: 10,
-            margin: 10,
-            textAlign: "center",
-            marginTop: 50,
-          }}
-        >
-          No hay eventos con denuncias registrados
-        </Paper>
-      </Box>
-    );
-  }*/
-  
-  const handleFilter = async () => {
-    handleCloseModal();
-    setIsLoading(true);
-    const start = initialDate.toISOString().substring(0, 10);
-    const end = finalDate.toISOString().substring(0, 10);
-    getComplaintRankingByEvents({ start, end }).then((res) => {
-        console.log("Response", res);
-        setRows(res);
-        setIsLoading(false);
-    });
-}
-
   const handleOpenModal = () => {
     setOpenModal(true);
   }
@@ -171,6 +139,21 @@ export const EventsTable = () => {
   }
 
   const ModalFilter = () => {
+    const [initialDate, setInitialDate] = useState(lastweek);
+    const [finalDate, setFinalDate] = useState(today);
+
+    const handleFilter = async () => {
+      handleCloseModal();
+      setIsLoading(true);
+      const start = initialDate.toISOString().substring(0, 10);
+      const end = finalDate.toISOString().substring(0, 10);
+      getComplaintRankingByEvents({ start, end }).then((res) => {
+        console.log("Response", res);
+        setRows(res);
+        setIsLoading(false);
+      });
+    }
+
     return(
     <>
       <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
@@ -333,7 +316,6 @@ export const EventsTable = () => {
                 page={page}
                 rowsPerPage={rowsPerPage}
                 rowsPerPageOptions={[]}
-                component="div"
                 labelDisplayedRows={({ from, to, count }) => page + 1}
                 labelRowsPerPage={null}
                 nextIconButtonProps={{
