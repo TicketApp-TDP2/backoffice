@@ -191,7 +191,7 @@ export function EventDetailScreen() {
       {event && (
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid item style={{ flexGrow: "1" }}>
-            <Typography variant="h3" sx={{ marginRight: 2 }}>
+            <Typography variant="h4" sx={{ marginRight: 2 }}>
               {event.name}
             </Typography>
             <hr />
@@ -211,42 +211,48 @@ export function EventDetailScreen() {
               style={{
                 backgroundColor: "white",
                 borderRadius: 20,
-                width: "80%"
+                width: "100%"
               }}
             >
               <Box sx={{ display: "flex" , paddingTop: 3, justifyContent: "center", alignItems: "center" }}>
-                <Grid>
-                  <Grid container justifyContent="flex-end" sx={{paddingRight: 3, paddingBottom: 3}}>
-                    <State state={event.state}></State>
-                  </Grid>
-                  <Grid >
+                <Grid sx={{width: '80%'}}>
+                    <Grid item justifyContent="flex-end" mb={3}>
+                      <State state={event.state}></State>
+                    </Grid>
+                  <Grid>
                     {organizer && (
-                    <Card variant="outlined" sx={{backgroundColor: "#f3f1fc"}}>
-                      <CardContent>
-                        <Stack direction="row" spacing={2}>
-                          <Stack>
-                            <Typography>
-                              Organizador
-                            </Typography>
-                            <Avatar alt="organizador" src={organizer.profile_picture} sx={{ width: 100 , height: 100, marginTop: 2 }}/>
+                      <Card variant="outlined" sx={{backgroundColor: "#f3f1fc"}}>
+                        <CardContent>
+                          <Stack direction="row" spacing={2}>
+                            <Stack>
+                              <Typography sx={{fontWeight: 'bold'}}>
+                                Organizador:
+                              </Typography>
+                              <Avatar alt="organizador" src={organizer.profile_picture} sx={{ width: 100 , height: 100, marginTop: 4 }}/>
+                            </Stack>
+                            <Stack alignContent={"center"}>
+                              <Typography >
+                                {organizer.first_name} {organizer.last_name} - {organizer.profession}
+                              </Typography>
+                              <Typography mt={4} mb={2} sx={{fontWeight: 'bold'}}>
+                                Descripción personal
+                              </Typography>
+                              {organizer.about_me ? (
+                                  <Typography>
+                                    {organizer.about_me}
+                                  </Typography>
+                              ) : (
+                                <Typography sx={{fontStyle: 'italic'}}>
+                                  No completado
+                                </Typography>
+                              )}
+                            </Stack>
                           </Stack>
-                          <Stack alignContent={"center"}>
-                            <Typography >
-                              {organizer.first_name} {organizer.last_name} - {organizer.profession}
-                            </Typography>
-                            <Typography sx={{marginTop: 2}}>
-                              Sobre mi
-                            </Typography>
-                            <Typography>
-                              {organizer.about_me}
-                            </Typography>
-                          </Stack>
-                        </Stack>
-                      </CardContent>
-                      <CardActions>
-                        <Button size="large" onClick={() => navigate(`/profile/${organizer.id}`)}>Ver perfil</Button>
-                      </CardActions>
-                    </Card>
+                        </CardContent>
+                        <CardActions sx={{ justifyContent: 'flex-end'}}>
+                            <Button size="large" onClick={() => navigate(`/profile/${organizer.id}`)}>Ver perfil</Button>
+                        </CardActions>
+                      </Card>
                     )}
                   </Grid>
                   <Grid mt={5} mb={5}>
@@ -394,6 +400,7 @@ export function EventDetailScreen() {
                       <strong>Ubicación</strong>
                     </Typography>
                     <Grid sx={{paddingLeft: 2}}>
+                      <Typography>{event.location.description}</Typography>
                       <GoogleMap
                         apiKey={process.env.REACT_APP_GEO_APIKEY}
                         defaultCenter={{
@@ -403,6 +410,7 @@ export function EventDetailScreen() {
                         defaultZoom={15}
                         mapMinHeight="50vh"
                         onGoogleApiLoaded={onGoogleApiLoaded}
+                        options={{ gestureHandling: 'none', disableDefaultUI: true}}
                       >
                         <Marker
                           key={1}
