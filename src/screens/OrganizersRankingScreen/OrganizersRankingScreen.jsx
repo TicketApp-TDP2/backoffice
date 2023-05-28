@@ -3,7 +3,6 @@ import SideBar from '../../components/SideBar';
 import { OrganizersTable } from "../../components/OrganizersTable";
 
 export const OrganizersRankingScreen = () => {
-
   return (
     <>
       <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
