@@ -1,6 +1,6 @@
 import SideBar from '../../components/SideBar';
 import { Typography, Box, Divider, Grid, Avatar, Paper, CircularProgress, Button, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import { useState, useEffect } from "react";
+import {useState, useEffect, useContext} from "react";
 import { getOrganizer } from "../../services/organizerService"
 import { useParams } from "react-router-dom";
 import { suspendOrganizer, unsuspendOrganizer, getComplaintByOrganizer } from '../../services/organizerService';
@@ -8,6 +8,15 @@ import Swal from 'sweetalert2';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
 import { ProfileState } from '../../components/ProfileState';
+import {getEventsByOrganizer, getUsersEnrolled} from "../../services/eventService";
+import {
+    cancelScheduledNotificationsForEvent,
+    rescheduleNotificationsForEvent,
+    sendNotification
+} from "../../services/pushService";
+import {ref} from "firebase/database";
+import {MobileNotificationsContext} from "../../index";
+import moment from "moment";
 
 export const ProfileScreen = () => {
     const { profileId } = useParams();
@@ -16,6 +25,7 @@ export const ProfileScreen = () => {
     const [isLoadingButton, setIsLoadingButton] = useState(false);
     const [complaints, setComplaints] = useState([]);
     const navigate = useNavigate();
+    const notificationsContext = useContext(MobileNotificationsContext);
 
     useEffect( () => {
       async function fetchData() {
@@ -44,6 +54,18 @@ export const ProfileScreen = () => {
             }).then(function() {
               navigate("/organizers");
             });
+            getEventsByOrganizer(profileId).then(async (result) => {
+                for (const event of result.data) {
+                    const title = "Información importante";
+                    const body = `El evento ${event.name} ha sido suspendido.`;
+                    const users = await getUsersEnrolled(event.id);
+                    users.forEach((userId) => {
+                        console.log("sending to", userId);
+                        sendNotification(title, body, userId);
+                    })
+                    cancelScheduledNotificationsForEvent(ref(notificationsContext.db), event.id);
+                }
+            })
           })
           .catch((error) => {
             setIsLoadingButton(false);
@@ -59,6 +81,13 @@ export const ProfileScreen = () => {
           });
     }
 
+    async function scheduleReminder(event) {
+        const eventStartTime = moment(event.date + ' ' + event.start_time);
+        const dayBeforeEvent = eventStartTime.subtract(1, 'days');
+        const sendAt = dayBeforeEvent.toString()
+        rescheduleNotificationsForEvent(ref(notificationsContext.db), event.id, sendAt, event.name)
+    }
+
     const handleUnsuspendOrganizer = async () => {
         setIsLoadingButton(true);
         await unsuspendOrganizer(profileId)
@@ -72,6 +101,18 @@ export const ProfileScreen = () => {
             }).then(function() {
               navigate("/organizers");
             });
+              getEventsByOrganizer(profileId).then(async (result) => {
+                  for (const event of result.data) {
+                      const title = "Información importante";
+                      const body = `El evento ${event.name} ha sido habilitado nuevamente.`;
+                      const users = await getUsersEnrolled(event.id);
+                      users.forEach((userId) => {
+                          console.log("sending to", userId);
+                          sendNotification(title, body, userId);
+                      })
+                      scheduleReminder(event);
+                  }
+              })
           })
           .catch((error) => {
             setIsLoadingButton(false);
