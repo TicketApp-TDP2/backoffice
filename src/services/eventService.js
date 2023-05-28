@@ -52,3 +52,7 @@ export async function getUsersEnrolled(eventId) {
 
     return users;
 }
+
+export async function getEventsByOrganizer(organizerId) {
+    return await axios.get(`/events`, { params: {organizer: organizerId}});
+}
