@@ -9,9 +9,14 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
 import { ProfileState } from '../../components/ProfileState';
 import {getEventsByOrganizer, getUsersEnrolled} from "../../services/eventService";
-import {cancelScheduledNotificationsForEvent, sendNotification} from "../../services/pushService";
+import {
+    cancelScheduledNotificationsForEvent,
+    rescheduleNotificationsForEvent,
+    sendNotification
+} from "../../services/pushService";
 import {ref} from "firebase/database";
 import {MobileNotificationsContext} from "../../index";
+import moment from "moment";
 
 export const ProfileScreen = () => {
     const { profileId } = useParams();
@@ -76,6 +81,13 @@ export const ProfileScreen = () => {
           });
     }
 
+    async function scheduleReminder(event) {
+        const eventStartTime = moment(event.date + ' ' + event.start_time);
+        const dayBeforeEvent = eventStartTime.subtract(1, 'days');
+        const sendAt = dayBeforeEvent.toString()
+        rescheduleNotificationsForEvent(ref(notificationsContext.db), event.id, sendAt, event.name)
+    }
+
     const handleUnsuspendOrganizer = async () => {
         setIsLoadingButton(true);
         await unsuspendOrganizer(profileId)
@@ -89,6 +101,18 @@ export const ProfileScreen = () => {
             }).then(function() {
               navigate("/organizers");
             });
+              getEventsByOrganizer(profileId).then(async (result) => {
+                  for (const event of result.data) {
+                      const title = "Información importante";
+                      const body = `El evento ${event.name} ha sido habilitado nuevamente.`;
+                      const users = await getUsersEnrolled(event.id);
+                      users.forEach((userId) => {
+                          console.log("sending to", userId);
+                          sendNotification(title, body, userId);
+                      })
+                      scheduleReminder(event);
+                  }
+              })
           })
           .catch((error) => {
             setIsLoadingButton(false);
