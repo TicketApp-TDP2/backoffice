@@ -6,8 +6,8 @@ export const EventsRankingScreen = () => {
 
   return (
     <>
+      <SideBar />
       <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
-        <SideBar />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid
             container
