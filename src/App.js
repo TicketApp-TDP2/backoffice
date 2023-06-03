@@ -9,6 +9,7 @@ import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/Organ
 import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { createTheme, ThemeProvider} from '@mui/material/styles';
 import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
+import { DashboardScreen } from './screens/DashboardScreen/DashboardScreen';
 
 const router = createHashRouter([
   {
@@ -26,6 +27,10 @@ const router = createHashRouter([
   }, {
     path: '/organizers',
     element: <OrganizersRankingScreen />
+  }
+  , {
+    path: '/dashboard',
+    element: <DashboardScreen />
   }
 ]);
 

@@ -10,6 +10,7 @@ import {Link as RouterLink, useLocation} from 'react-router-dom';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
   
 const DRAWER_WIDTH = 225;
@@ -27,6 +28,7 @@ const {pathname} = useLocation();
 const data = [
   { name: "Ranking Eventos", icon: <EventNoteIcon />, navigate: '/events' },
   { name: "Ranking Organizadores", icon: <AccountCircleIcon />, navigate: '/organizers' },
+  { name: "Métricas", icon: <BarChartIcon />, navigate: '/dashboard' },
 ];
 
 const getList = () => (
