@@ -1,13 +1,42 @@
-import { Box, CardContent, Card } from '@mui/material';
+import {Box, CardContent, Card, Typography} from '@mui/material';
 import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 export const BarChart = (props) => {
     const { barData } = props;
     return (
-      <Card variant="outlined" sx={{ width: "65%", height: "100%" }}>
+      <Card>
         <CardContent>
-          <Box sx={{ width: "100%", height: "100%" }}>
-            <Bar options={{responsive: true, plugins: {legend: {position: 'top'}, title: {display: true, text: 'Cantidad de usuarios acreditados a lo largo del tiempo'}}}} data={barData} />
+          <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>Cantidad de usuarios acreditados en el tiempo</Typography>
+          <Box>
+            <Bar
+                options={{
+                    responsive: true,
+                    plugins: {
+                        legend: {display: false},
+                    },
+                    maintainAspectRatio: false
+                }}
+                width={"70%"}
+                data={barData}
+            />
           </Box>
         </CardContent>
       </Card>

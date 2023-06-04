@@ -30,17 +30,17 @@ const defaultPieData = {
   labels: ['Borrador', 'Publicado', 'Finalizado', 'Cancelado', 'Suspendido'],
   datasets: [
     {
-      label: 'cant de eventos',
+      label: 'Cantidad de eventos',
       data: [12, 19, 3, 5, 2],
       backgroundColor: [
-        'rgba(255, 206, 86, 0.2)',
+        'rgba(138,137,136,0.2)',
         'rgba(75, 192, 192, 0.2)',
         'rgba(54, 162, 235, 0.2)',
         'rgba(255, 99, 132, 0.2)',
         'rgba(255, 159, 64, 0.2)',
       ],
       borderColor: [
-        'rgba(255, 206, 86, 1)',
+        'rgb(136,136,132)',
         'rgba(75, 192, 192, 1)',
         'rgba(54, 162, 235, 1)',
         'rgba(255, 99, 132, 1)',
@@ -61,7 +61,7 @@ const doubleLineData = {
       backgroundColor: 'rgba(255, 99, 132, 0.5)',
     },
     {
-      label: 'Suspenciones',
+      label: 'Suspensiones',
       data: [28, 48, 40, 19, 86, 27, 90, 12, 38, 26, 78, 52],
       borderColor: 'rgb(53, 162, 235)',
       backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -85,7 +85,7 @@ const barData = {
   labels:['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
   datasets: [
     {
-      label: 'Cantidad de eventos',
+      label: 'Cantidad de usuarios acreditados',
       data: [3, 23, 42, 45, 53, 55, 63, 67, 73, 79, 85, 90],
       backgroundColor: 'rgba(255, 99, 132, 0.5)',
     }
@@ -101,7 +101,18 @@ export const DashboardScreen = () => {
   const [pieData, setPieData] = useState(defaultPieData);
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState([]);
-  
+
+  function setPieChartData(res) {
+    const newData = [];
+    newData.push(res.data.event_states["Borrador"]);
+    newData.push(res.data.event_states["Publicado"]);
+    newData.push(res.data.event_states["Finalizado"]);
+    newData.push(res.data.event_states["Cancelado"]);
+    newData.push(res.data.event_states["Suspendido"]);
+    console.log("newData", newData);
+    setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
+  }
+
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
@@ -109,17 +120,10 @@ export const DashboardScreen = () => {
       const start_date = lastyear.toISOString().substring(0, 10);
       const end_date = today.toISOString().substring(0, 10);
       getStats({ start_date, end_date }).then((res) => {
-          console.log("response", res.data);
-          const newData=[];
-          newData.push(res.data.event_states["Borrador"]);
-          newData.push(res.data.event_states["Publicado"]);
-          newData.push(res.data.event_states["Finalizado"]);
-          newData.push(res.data.event_states["Cancelado"]);
-          newData.push(res.data.event_states["Suspendido"]);
-          console.log("newData", newData);
-          setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
-          setRows(res.data.top_organizers);
-          setIsLoading(false);
+        console.log("response", res.data);
+        setPieChartData(res);
+        setRows(res.data.top_organizers);
+        setIsLoading(false);
       });
     }
     fetchData();
@@ -127,13 +131,10 @@ export const DashboardScreen = () => {
 
   return (
     <>
+      <SideBar />
       <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
-        <SideBar />
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Grid
-            container
-            sx={{ alignItems: "center", padding: 2, minHeight: 40 }}
-          >
+        <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+            {/*
             <Grid item style={{ flexGrow: "1" }}>
               <Typography
                 variant="h3"
@@ -143,25 +144,28 @@ export const DashboardScreen = () => {
                 Métricas
               </Typography>
             </Grid>
-          </Grid>
+            */}
           {isLoading && (
             <Box sx={{ display: 'flex', justifyContent: "center", marginTop: 4 }}>
               <CircularProgress color="primary" />
             </Box>
           )}
           {!isLoading && (
-            <>
-            <Stack direction="row" spacing={2} sx={{ marginTop: 4 }}>
-              <PieChart pieData={pieData}/>
-              <DoubleLineChart doubleLineData={doubleLineData}/>
-            </Stack>
-            <Stack direction="row" spacing={2} sx={{ marginTop: 4 }}>
-              <TopOrganizersTable rows={rows}/>
-                <LineChart lineData={lineData}/>
-                
-            </Stack>
-            {/*<BarChart barData={barData}/>*/}
-            </>
+              <Grid container spacing={2}>
+                <Grid item xs={8}>
+                  <Stack spacing={2} sx={{ marginTop: 4, width: '100%' }}>
+                    <DoubleLineChart doubleLineData={doubleLineData}/>
+                    <LineChart lineData={lineData}/>
+                    <BarChart barData={barData}/>
+                  </Stack>
+                </Grid>
+                <Grid item xs={4}>
+                  <Stack spacing={2} sx={{ marginTop: 4 }}>
+                    <PieChart pieData={pieData}/>
+                    <TopOrganizersTable rows={rows}/>
+                  </Stack>
+                </Grid>
+              </Grid>
           )}
         </Box>
       </Box>

@@ -16,6 +16,9 @@ const router = createHashRouter([
     path: '/',
     element: <LandingScreen />
   }, {
+    path: '/dashboard',
+    element: <DashboardScreen />
+  }, {
     path: '/events',
     element: <EventsRankingScreen />
   }, {
@@ -26,11 +29,7 @@ const router = createHashRouter([
     element: <ProfileScreen />
   }, {
     path: '/organizers',
-    element: <OrganizersRankingScreen />
-  }
-  , {
-    path: '/dashboard',
-    element: <DashboardScreen />
+    element: <OrganizersRankingScreen/>
   }
 ]);
 

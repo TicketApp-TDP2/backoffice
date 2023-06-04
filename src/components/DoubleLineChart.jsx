@@ -1,13 +1,24 @@
-import { Box, CardContent, Card } from '@mui/material';
+import {Box, CardContent, Card, Typography} from '@mui/material';
 import { Line } from 'react-chartjs-2';
 
 export const DoubleLineChart = (props) => {
     const { doubleLineData } = props;
     return (
-      <Card variant="outlined" sx={{ width: "65%", height: "100%" }}>
+      <Card>
         <CardContent>
-          <Box sx={{ width: "100%", height: "100%" }}>
-            <Line options={{responsive: true, plugins: {legend: {position: 'top'}, title: {display: true, text: 'Cantidad de denuncias y suspenciones a lo largo del tiempo'}}}} data={doubleLineData} />
+          <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>Cantidad de denuncias y suspensiones en el tiempo</Typography>
+          <Box>
+            <Line
+                options={{
+                    responsive: true,
+                    plugins: {
+                        legend: {position: 'right'},
+                    },
+                    maintainAspectRatio: false
+                }}
+                width={"70%"}
+                data={doubleLineData}
+            />
           </Box>
         </CardContent>
       </Card>
