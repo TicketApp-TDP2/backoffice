@@ -25,19 +25,19 @@ export const BarChart = (props) => {
       <Card>
         <CardContent>
           <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>Cantidad de usuarios acreditados en el tiempo</Typography>
-          <Box>
-            <Bar
-                options={{
-                    responsive: true,
-                    plugins: {
-                        legend: {display: false},
-                    },
-                    maintainAspectRatio: false
-                }}
-                width={"70%"}
-                data={barData}
-            />
-          </Box>
+            <Box>
+              <Bar
+                  options={{
+                      responsive: true,
+                      plugins: {
+                          legend: {display: false},
+                      },
+                      maintainAspectRatio: false
+                  }}
+                  width={"70%"}
+                  data={barData}
+              />
+            </Box>
         </CardContent>
       </Card>
     )

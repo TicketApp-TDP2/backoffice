@@ -81,7 +81,7 @@ const defaultSuspendedData = {
 };
 
 const lineData = {
-  labels:['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+  labels:[['Enero', '2022'], 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
   datasets: [
     {
       label: 'Cantidad de eventos',
@@ -130,66 +130,127 @@ export const DashboardScreen = () => {
     setOpenModal(false);
   }
 
+  function getMonthName(monthNumber) {
+    const date = new Date();
+    date.setMonth(monthNumber - 1);
+    let new_date = date.toLocaleString('es-AR', {
+      month: 'long',
+    });
+    new_date = new_date.charAt(0).toUpperCase() + new_date.slice(1);
+    return new_date;
+  }
+
+  function dateRange(start_date, end_date) {
+    var start      = start_date.split('-');
+    var end        = end_date.split('-');
+    var startYear  = parseInt(start[0]);
+    var endYear    = parseInt(end[0]);
+    var dates      = [];
+    for(var i = startYear; i <= endYear; i++) {
+      var endMonth = i != endYear ? 11 : parseInt(end[1]) - 1;
+      var startMon = i === startYear ? parseInt(start[1])-1 : 0;
+      for(var j = startMon; j <= endMonth; j = j > 12 ? j % 12 || 11 : j+1) {
+        var month = j+1;
+        var displayMonth = month < 10 ? '0'+month : month;
+        dates.push([i, displayMonth, '01'].join('-'));
+      }
+    }
+    return dates;
+  }
+
   function setPieChartData(res) {
     const newData = [];
-    newData.push(res.data.event_states["Borrador"]);
-    newData.push(res.data.event_states["Publicado"]);
-    newData.push(res.data.event_states["Finalizado"]);
-    newData.push(res.data.event_states["Cancelado"]);
-    newData.push(res.data.event_states["Suspendido"]);
-    console.log("newData", newData);
-    setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
+    const values = [];
+    values.push(res.data.event_states["Borrador"]);
+    values.push(res.data.event_states["Publicado"]);
+    values.push(res.data.event_states["Finalizado"]);
+    values.push(res.data.event_states["Cancelado"]);
+    values.push(res.data.event_states["Suspendido"]);
+    let sum = values.reduce(function(a, b){
+      return a + b;
+    });
+    if (sum === 0) {
+      console.log("newData vacio", newData);
+      setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
+    }
+    else {
+      newData.push(res.data.event_states["Borrador"]);
+      newData.push(res.data.event_states["Publicado"]);
+      newData.push(res.data.event_states["Finalizado"]);
+      newData.push(res.data.event_states["Cancelado"]);
+      newData.push(res.data.event_states["Suspendido"]);
+      console.log("newData", newData);
+      setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
+    }
   }
 
-  function setBarChartData(res, group_by) {
-    if (group_by === "month") {
-      const newData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //El array deberia tener el tamaño segun la cantidad de meses que hay entre el start_date y el end_date
+  function setBarChartData(res, start_date, end_date) {
+    console.log("start_date", start_date);
+    console.log("end_date", end_date);
+    const months = dayjs(end_date).diff(start_date, 'month');
+    const newData = Array(months + 1).fill(0);
+    const dates = dateRange(start_date, end_date);
+    const newLabels = [];
+    dates.forEach(date => {
+      const month = date.split("-")[1];
+      const newLabel = [];
+      newLabel.push(getMonthName(month));
+      newLabel.push(date.split("-")[0]);
+      newLabels.push(newLabel);
       res.data.verified_bookings.forEach(booking => {
-        const month = booking.date.split("-")[1];
-        if (month[0] === "0") {
-          newData[parseInt(month[1])-1] = booking.bookings;
-        }
-        else {
-          newData[parseInt(month)-1] = booking.bookings;
+        if (date.substring(0, 7) === booking.date) {
+          newData[dates.indexOf(date)] = booking.bookings;
         }
       });
-      console.log("newBarData", newData);
-      setBarData({...barData, datasets: [{...barData.datasets[0], data: newData}]});
-    }
+    });
+    console.log("newBarData", newData);
+    setBarData({...barData, labels: newLabels, datasets: [{...barData.datasets[0], data: newData}]});
   }
 
-  function setSuspendedChartData(res, group_by) {
-    if (group_by === "month") {
-      const newData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //El array deberia tener el tamaño segun la cantidad de meses que hay entre el start_date y el end_date
+  function setSuspendedChartData(res, start_date, end_date) {
+    const months = dayjs(end_date).diff(start_date, 'month');
+    console.log("months suspended", months);
+    const newData = Array(months + 1).fill(0);
+    console.log("newData ceros suspended", newData);
+    const dates = dateRange(start_date, end_date);
+    const newLabels = [];
+    dates.forEach(date => {
+      const month = date.split("-")[1];
+      const newLabel = [];
+      newLabel.push(getMonthName(month));
+      newLabel.push(date.split("-")[0]);
+      newLabels.push(newLabel);
       res.data.suspended_by_time.forEach(suspention => {
-        const month = suspention.date.split("-")[1];
-        if (month[0] === "0") {
-          newData[parseInt(month[1])-1] = suspention.suspended;
-        }
-        else {
-          newData[parseInt(month)-1] = suspention.suspended;
+        if (date.substring(0, 7) === suspention.date) {
+          newData[dates.indexOf(date)] = suspention.suspended;
         }
       });
-      console.log("newSuspendedData", newData);
-      setSuspendedData({...suspendedData, datasets: [{...suspendedData.datasets[0], data: newData}]});
-    }
+    });
+    console.log("newSuspendedData", newData);
+    setSuspendedData({...suspendedData, labels: newLabels, datasets: [{...suspendedData.datasets[0], data: newData}]});
   }
 
-  function setComplaintChartData(res, group_by) {
-    if (group_by === "month") {
-      const newData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //El array deberia tener el tamaño segun la cantidad de meses que hay entre el start_date y el end_date
+  function setComplaintChartData(res, start_date, end_date) {
+    const months = dayjs(end_date).diff(start_date, 'month');
+    console.log("months", months);
+    const newData = Array(months + 1).fill(0);
+    console.log("newData ceros", newData);
+    const dates = dateRange(start_date, end_date);
+    const newLabels = [];
+    dates.forEach(date => {
+      const month = date.split("-")[1];
+      const newLabel = [];
+      newLabel.push(getMonthName(month));
+      newLabel.push(date.split("-")[0]);
+      newLabels.push(newLabel);
       res.data.complaints_by_time.forEach(complaint => {
-        const month = complaint.date.split("-")[1];
-        if (month[0] === "0") {
-          newData[parseInt(month[1])-1] = complaint.complaints;
-        }
-        else {
-          newData[parseInt(month)-1] = complaint.complaints;
+        if (date.substring(0, 7) === complaint.date) {
+          newData[dates.indexOf(date)] = complaint.complaints;
         }
       });
-      console.log("newSuspendedData", newData);
-      setComplaintData({...complaintData, datasets: [{...complaintData.datasets[0], data: newData}]});
-    }
+    });
+    console.log("newComplaintData", newData);
+    setComplaintData({...complaintData, labels: newLabels, datasets: [{...complaintData.datasets[0], data: newData}]});
   }
 
   useEffect(() => {
@@ -198,14 +259,13 @@ export const DashboardScreen = () => {
       setIsLoading(true);
       const start_date = lastyear.toISOString().substring(0, 10);
       const end_date = today.toISOString().substring(0, 10);
-      const group_by = "month";
-      getStats({ start_date, end_date, group_by }).then((res) => {
+      getStats({ start_date, end_date }).then((res) => {
         console.log("response", res.data);
         setPieChartData(res);
-        setBarChartData(res, group_by);
-        setSuspendedChartData(res, group_by);
-        setComplaintChartData(res, group_by);
         setRows(res.data.top_organizers);
+        setBarChartData(res, start_date, end_date);
+        setSuspendedChartData(res, start_date, end_date);
+        setComplaintChartData(res, start_date, end_date);
         setIsLoading(false);
       });
     }
@@ -217,27 +277,30 @@ export const DashboardScreen = () => {
     const [finalDate, setFinalDate] = useState(today);
 
     const handleFilter = async () => {
-      /*handleCloseModal();
+      handleCloseModal();
       setIsLoading(true);
       const start_date = initialDate.toISOString().substring(0, 10);
       const end_date = finalDate.toISOString().substring(0, 10);
-      const group_by = "month";
-      getStats({ start_date, end_date, group_by }).then((res) => {
-        console.log("response", res.data);
+      getStats({ start_date, end_date }).then((res) => {
+        console.log("response filter", res.data);
         setPieChartData(res);
-        setBarChartData(res, group_by);
-        setSuspendedChartData(res, group_by);
-        setComplaintChartData(res, group_by);
         setRows(res.data.top_organizers);
+        setBarChartData(res, start_date, end_date);
+        setSuspendedChartData(res, start_date, end_date);
+        setComplaintChartData(res, start_date, end_date);
         setIsLoading(false);
-      });*/
+      });
     }
 
     return(
     <>
       <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
-        <Typography marginRight={2} marginTop={2}>Desde: {initialDate.toISOString().substring(0, 10)}</Typography>
-        <Typography marginRight={2} marginTop={2}>Hasta: {finalDate.toISOString().substring(0, 10)}</Typography>
+        {initialDate && finalDate && (
+          <>
+            <Typography marginRight={2} marginTop={2}>Desde: {initialDate.toISOString().substring(0, 10)}</Typography>
+            <Typography marginRight={2} marginTop={2}>Hasta: {finalDate.toISOString().substring(0, 10)}</Typography>
+          </>
+        )}
         <IconButton aria-label="delete" color="primary" size="large" onClick={handleOpenModal}>
           <FilterListIcon />
         </IconButton>

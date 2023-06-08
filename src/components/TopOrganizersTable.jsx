@@ -26,7 +26,7 @@ export const TopOrganizersTable = (props) => {
       <CardContent>
         <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={3}>Top 10 organizadores</Typography>
         {rows.length === 0 && (
-            <Box style={{ height: "50em" }}>
+            <Box style={{ height: "10em" }}>
                 <Paper
                 style={{
                     padding: 10,
