@@ -2,11 +2,11 @@ import {Box, CardContent, Card, Typography} from '@mui/material';
 import { Line } from 'react-chartjs-2';
 
 export const LineChart = (props) => {
-    const { lineData } = props;
+    const { lineData, name } = props;
     return (
       <Card>
         <CardContent>
-            <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>Cantidad de eventos en el tiempo</Typography>
+            <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>{name}</Typography>
             <Box>
             <Line
                 options={{

@@ -6,7 +6,7 @@ export const DoubleLineChart = (props) => {
     return (
       <Card>
         <CardContent>
-          <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>Cantidad de denuncias y suspensiones en el tiempo</Typography>
+          <Typography variant="h6" sx={{textAlign: 'left', fontWeight: 'bold'}} mb={1}>Cantidad de eventos en el tiempo</Typography>
           <Box>
             <Line
                 options={{

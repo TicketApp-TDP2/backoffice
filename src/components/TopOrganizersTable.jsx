@@ -56,7 +56,7 @@ export const TopOrganizersTable = (props) => {
                 <TableHead>
                 <TableRow>
                     <TableCell style={{ width: "33%" }}>Organizador</TableCell>
-                    <TableCell style={{ width: "33%" }} align="center">Cantidad de eventos</TableCell>
+                    <TableCell style={{ width: "45%" }} align="center">Cantidad de acreditados totales</TableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
@@ -70,7 +70,7 @@ export const TopOrganizersTable = (props) => {
                       <TableCell sx={{padding: 0}}>
                           <Button
                           onClick={() => {
-                              navigate(`/profile/${row.organizer_id}`);
+                              navigate(`/profile/${row.id}`);
                           }}
                           underline="hover"
                           sx={{fontSize: 14}}
@@ -78,7 +78,7 @@ export const TopOrganizersTable = (props) => {
                           {row.name}
                           </Button>
                       </TableCell>
-                      <TableCell align="center">{row.events}</TableCell>
+                      <TableCell align="center">{row.verified_bookings}</TableCell>
                     </TableRow>
                 ))}
 

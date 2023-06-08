@@ -1,4 +1,5 @@
-import { Typography, Grid, Box, CardContent, Card, CircularProgress, Stack } from '@mui/material';
+import { IconButton, Grid, Box, CircularProgress, Stack } from '@mui/material';
+import { Button, Typography, Divider, Modal } from "@mui/material";
 import SideBar from '../../components/SideBar';
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale,
@@ -11,9 +12,13 @@ import { getStats } from '../../services/statsService';
 import { TopOrganizersTable } from '../../components/TopOrganizersTable';
 import dayjs from 'dayjs';
 import { PieChart } from '../../components/PieChart';
-import { DoubleLineChart } from '../../components/DoubleLineChart';
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DoubleLineChart } from '../../components/DoubleLineChart';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 ChartJS.register(
@@ -51,21 +56,27 @@ const defaultPieData = {
   ],
 };
 
-const doubleLineData = {
+const defaultComplaintData = {
   labels:['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
   datasets: [
     {
       label: 'Denuncias',
-      data: [65, 59, 80, 81, 56, 55, 40, 12, 34, 56, 78, 90],
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    },
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      borderColor: 'rgba(255, 99, 132, 1)',
+      backgroundColor: 'rgba(255, 99, 132, 1)',
+    }
+  ],
+};
+
+const defaultSuspendedData = {
+  labels:['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+  datasets: [
     {
       label: 'Suspensiones',
-      data: [28, 48, 40, 19, 86, 27, 90, 12, 38, 26, 78, 52],
-      borderColor: 'rgb(53, 162, 235)',
-      backgroundColor: 'rgba(53, 162, 235, 0.5)',
-    },
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      borderColor: 'rgba(255, 159, 64, 1)',
+      backgroundColor: 'rgba(255, 159, 64, 1)',
+    }
   ],
 };
 
@@ -75,19 +86,25 @@ const lineData = {
     {
       label: 'Cantidad de eventos',
       data: [3, 23, 42, 45, 53, 55, 63, 67, 73, 79, 85, 90],
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      backgroundColor: 'rgba(54, 162, 235, 1)',
+    },
+    {
+      label: 'Cantidad de eventos publicados',
+      data: [3, 23, 34, 39, 53, 61, 63, 67, 75, 80, 81, 92],
+      borderColor: 'rgba(75, 192, 192, 1)',
+      backgroundColor: 'rgba(75, 192, 192, 1)',
     }
   ],
 };
 
-const barData = {
-  labels:['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+const defaultBarData = {
+  labels:['', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
   datasets: [
     {
       label: 'Cantidad de usuarios acreditados',
-      data: [3, 23, 42, 45, 53, 55, 63, 67, 73, 79, 85, 90],
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: '#8978C7',
     }
   ],
 };
@@ -99,8 +116,19 @@ console.log("lastyear", lastyear.toISOString().substring(0, 10));
 
 export const DashboardScreen = () => {
   const [pieData, setPieData] = useState(defaultPieData);
+  const [barData, setBarData] = useState(defaultBarData);
+  const [suspendedData, setSuspendedData] = useState(defaultSuspendedData);
+  const [complaintData, setComplaintData] = useState(defaultComplaintData);
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  }
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  }
 
   function setPieChartData(res) {
     const newData = [];
@@ -113,15 +141,70 @@ export const DashboardScreen = () => {
     setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
   }
 
+  function setBarChartData(res, group_by) {
+    if (group_by === "month") {
+      const newData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //El array deberia tener el tamaño segun la cantidad de meses que hay entre el start_date y el end_date
+      res.data.verified_bookings.forEach(booking => {
+        const month = booking.date.split("-")[1];
+        if (month[0] === "0") {
+          newData[parseInt(month[1])-1] = booking.bookings;
+        }
+        else {
+          newData[parseInt(month)-1] = booking.bookings;
+        }
+      });
+      console.log("newBarData", newData);
+      setBarData({...barData, datasets: [{...barData.datasets[0], data: newData}]});
+    }
+  }
+
+  function setSuspendedChartData(res, group_by) {
+    if (group_by === "month") {
+      const newData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //El array deberia tener el tamaño segun la cantidad de meses que hay entre el start_date y el end_date
+      res.data.suspended_by_time.forEach(suspention => {
+        const month = suspention.date.split("-")[1];
+        if (month[0] === "0") {
+          newData[parseInt(month[1])-1] = suspention.suspended;
+        }
+        else {
+          newData[parseInt(month)-1] = suspention.suspended;
+        }
+      });
+      console.log("newSuspendedData", newData);
+      setSuspendedData({...suspendedData, datasets: [{...suspendedData.datasets[0], data: newData}]});
+    }
+  }
+
+  function setComplaintChartData(res, group_by) {
+    if (group_by === "month") {
+      const newData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //El array deberia tener el tamaño segun la cantidad de meses que hay entre el start_date y el end_date
+      res.data.complaints_by_time.forEach(complaint => {
+        const month = complaint.date.split("-")[1];
+        if (month[0] === "0") {
+          newData[parseInt(month[1])-1] = complaint.complaints;
+        }
+        else {
+          newData[parseInt(month)-1] = complaint.complaints;
+        }
+      });
+      console.log("newSuspendedData", newData);
+      setComplaintData({...complaintData, datasets: [{...complaintData.datasets[0], data: newData}]});
+    }
+  }
+
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
       setIsLoading(true);
       const start_date = lastyear.toISOString().substring(0, 10);
       const end_date = today.toISOString().substring(0, 10);
-      getStats({ start_date, end_date }).then((res) => {
+      const group_by = "month";
+      getStats({ start_date, end_date, group_by }).then((res) => {
         console.log("response", res.data);
         setPieChartData(res);
+        setBarChartData(res, group_by);
+        setSuspendedChartData(res, group_by);
+        setComplaintChartData(res, group_by);
         setRows(res.data.top_organizers);
         setIsLoading(false);
       });
@@ -129,11 +212,108 @@ export const DashboardScreen = () => {
     fetchData();
   }, []);
 
+  const ModalFilter = () => {
+    const [initialDate, setInitialDate] = useState(lastyear);
+    const [finalDate, setFinalDate] = useState(today);
+
+    const handleFilter = async () => {
+      /*handleCloseModal();
+      setIsLoading(true);
+      const start_date = initialDate.toISOString().substring(0, 10);
+      const end_date = finalDate.toISOString().substring(0, 10);
+      const group_by = "month";
+      getStats({ start_date, end_date, group_by }).then((res) => {
+        console.log("response", res.data);
+        setPieChartData(res);
+        setBarChartData(res, group_by);
+        setSuspendedChartData(res, group_by);
+        setComplaintChartData(res, group_by);
+        setRows(res.data.top_organizers);
+        setIsLoading(false);
+      });*/
+    }
+
+    return(
+    <>
+      <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
+        <Typography marginRight={2} marginTop={2}>Desde: {initialDate.toISOString().substring(0, 10)}</Typography>
+        <Typography marginRight={2} marginTop={2}>Hasta: {finalDate.toISOString().substring(0, 10)}</Typography>
+        <IconButton aria-label="delete" color="primary" size="large" onClick={handleOpenModal}>
+          <FilterListIcon />
+        </IconButton>
+      </Grid>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 800,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 2
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Filtro por fecha
+          </Typography>
+          <Divider/>
+          <Grid container sx={{mt: 2}}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid item xs={1}>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  Desde:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+              <DatePicker
+                label="Fecha"
+                value={initialDate}
+                onChange={(newValue) => setInitialDate(newValue)}
+                format="DD/MM/YYYY"
+                disableFuture
+                sx={{width: "95%", pr:2}}
+                />
+              </Grid>
+              <Grid item xs={1}>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  Hasta:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+                <DatePicker
+                  label="Fecha"
+                  value={finalDate}
+                  onChange={(newValue) => setFinalDate(newValue)}
+                  format="DD/MM/YYYY"
+                  disableFuture
+                  sx={{width: "95%", pr:2}}
+                />
+              </Grid>
+            </LocalizationProvider>
+          </Grid>
+          <Box display="flex" justifyContent="flex-end" marginTop={2}>
+            <Button variant="contained" size="large" onClick={handleFilter} >
+              Filtrar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </>
+    );
+  }
+
   return (
     <>
       <SideBar />
       <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
         <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+          <ModalFilter/>
             {/*
             <Grid item style={{ flexGrow: "1" }}>
               <Typography
@@ -153,14 +333,15 @@ export const DashboardScreen = () => {
           {!isLoading && (
               <Grid container spacing={2}>
                 <Grid item xs={8}>
-                  <Stack spacing={2} sx={{ marginTop: 4, width: '100%' }}>
-                    <DoubleLineChart doubleLineData={doubleLineData}/>
-                    <LineChart lineData={lineData}/>
+                  <Stack spacing={2} sx={{ width: '100%' }}>
+                    <LineChart lineData={complaintData} name={"Cantidad de denuncias en el tiempo"}/>
+                    <LineChart lineData={suspendedData} name={"Cantidad de suspensiones en el tiempo"}/>
+                    <DoubleLineChart doubleLineData={lineData}/>
                     <BarChart barData={barData}/>
                   </Stack>
                 </Grid>
                 <Grid item xs={4}>
-                  <Stack spacing={2} sx={{ marginTop: 4 }}>
+                  <Stack spacing={2}>
                     <PieChart pieData={pieData}/>
                     <TopOrganizersTable rows={rows}/>
                   </Stack>
