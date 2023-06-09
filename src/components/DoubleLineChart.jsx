@@ -12,7 +12,7 @@ export const DoubleLineChart = (props) => {
                 options={{
                     responsive: true,
                     plugins: {
-                        legend: {position: 'right'},
+                        legend: {position: 'top'},
                     },
                     maintainAspectRatio: false
                 }}

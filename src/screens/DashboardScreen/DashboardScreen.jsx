@@ -1,5 +1,5 @@
-import { IconButton, Grid, Box, CircularProgress, Stack } from '@mui/material';
-import { Button, Typography, Divider, Modal } from "@mui/material";
+import { Grid, Box, CircularProgress, Stack } from '@mui/material';
+import { Button, Typography } from "@mui/material";
 import SideBar from '../../components/SideBar';
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale,
@@ -14,7 +14,6 @@ import dayjs from 'dayjs';
 import { PieChart } from '../../components/PieChart';
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -80,7 +79,7 @@ const defaultSuspendedData = {
   ],
 };
 
-const lineData = {
+const defaultLineData = {
   labels:[['Enero', '2022'], 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
   datasets: [
     {
@@ -119,16 +118,11 @@ export const DashboardScreen = () => {
   const [barData, setBarData] = useState(defaultBarData);
   const [suspendedData, setSuspendedData] = useState(defaultSuspendedData);
   const [complaintData, setComplaintData] = useState(defaultComplaintData);
+  const [eventsData, setEventsData] = useState(defaultLineData);
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  }
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  }
+  const [startDate, setStartDate] = useState(lastyear);
+  const [endDate, setEndDate] = useState(today);
 
   function getMonthName(monthNumber) {
     const date = new Date();
@@ -147,7 +141,7 @@ export const DashboardScreen = () => {
     var endYear    = parseInt(end[0]);
     var dates      = [];
     for(var i = startYear; i <= endYear; i++) {
-      var endMonth = i != endYear ? 11 : parseInt(end[1]) - 1;
+      var endMonth = i !== endYear ? 11 : parseInt(end[1]) - 1;
       var startMon = i === startYear ? parseInt(start[1])-1 : 0;
       for(var j = startMon; j <= endMonth; j = j > 12 ? j % 12 || 11 : j+1) {
         var month = j+1;
@@ -232,9 +226,7 @@ export const DashboardScreen = () => {
 
   function setComplaintChartData(res, start_date, end_date) {
     const months = dayjs(end_date).diff(start_date, 'month');
-    console.log("months", months);
     const newData = Array(months + 1).fill(0);
-    console.log("newData ceros", newData);
     const dates = dateRange(start_date, end_date);
     const newLabels = [];
     dates.forEach(date => {
@@ -253,12 +245,39 @@ export const DashboardScreen = () => {
     setComplaintData({...complaintData, labels: newLabels, datasets: [{...complaintData.datasets[0], data: newData}]});
   }
 
+  function setEventsChartData(res, start_date, end_date) {
+    const months = dayjs(end_date).diff(start_date, 'month');
+    const newEventsData = Array(months + 1).fill(0);
+    const newEventsPublishedData = Array(months + 1).fill(0);
+    const dates = dateRange(start_date, end_date);
+    const newLabels = [];
+    dates.forEach(date => {
+      const month = date.split("-")[1];
+      const newLabel = [];
+      newLabel.push(getMonthName(month));
+      newLabel.push(date.split("-")[0]);
+      newLabels.push(newLabel);
+      res.data.events_by_time.forEach(event => {
+        if (date.substring(0, 7) === event.date) {
+          newEventsData[dates.indexOf(date)] = event.events;
+        }
+      });
+      res.data.events_published_by_time.forEach(event => {
+        if (date.substring(0, 7) === event.date) {
+          newEventsPublishedData[dates.indexOf(date)] = event.events;
+        }
+      });
+    });
+    console.log("newEventsData", newEventsData);
+    setEventsData({...eventsData, labels: newLabels, datasets: [{...eventsData.datasets[0], data: newEventsData}, {...eventsData.datasets[1], data: newEventsPublishedData}]});
+  }
+
   useEffect(() => {
     console.log("use effect");
     async function fetchData() {
       setIsLoading(true);
-      const start_date = lastyear.toISOString().substring(0, 10);
-      const end_date = today.toISOString().substring(0, 10);
+      const start_date = startDate.toISOString().substring(0, 10);
+      const end_date = endDate.toISOString().substring(0, 10);
       getStats({ start_date, end_date }).then((res) => {
         console.log("response", res.data);
         setPieChartData(res);
@@ -266,67 +285,34 @@ export const DashboardScreen = () => {
         setBarChartData(res, start_date, end_date);
         setSuspendedChartData(res, start_date, end_date);
         setComplaintChartData(res, start_date, end_date);
+        setEventsChartData(res, start_date, end_date);
         setIsLoading(false);
       });
     }
     fetchData();
   }, []);
 
-  const ModalFilter = () => {
-    const [initialDate, setInitialDate] = useState(lastyear);
-    const [finalDate, setFinalDate] = useState(today);
+  const handleFilter = async () => {
+    setIsLoading(true);
+    const start_date = startDate.toISOString().substring(0, 10);
+    const end_date = endDate.toISOString().substring(0, 10);
+    getStats({ start_date, end_date }).then((res) => {
+      console.log("response filter", res.data);
+      setPieChartData(res);
+      setRows(res.data.top_organizers);
+      setBarChartData(res, start_date, end_date);
+      setSuspendedChartData(res, start_date, end_date);
+      setComplaintChartData(res, start_date, end_date);
+      setIsLoading(false);
+    });
+  }
 
-    const handleFilter = async () => {
-      handleCloseModal();
-      setIsLoading(true);
-      const start_date = initialDate.toISOString().substring(0, 10);
-      const end_date = finalDate.toISOString().substring(0, 10);
-      getStats({ start_date, end_date }).then((res) => {
-        console.log("response filter", res.data);
-        setPieChartData(res);
-        setRows(res.data.top_organizers);
-        setBarChartData(res, start_date, end_date);
-        setSuspendedChartData(res, start_date, end_date);
-        setComplaintChartData(res, start_date, end_date);
-        setIsLoading(false);
-      });
-    }
-
-    return(
+  return (
     <>
-      <Grid container justifyContent="flex-end" sx={{paddingRight: 3}}>
-        {initialDate && finalDate && (
-          <>
-            <Typography marginRight={2} marginTop={2}>Desde: {initialDate.toISOString().substring(0, 10)}</Typography>
-            <Typography marginRight={2} marginTop={2}>Hasta: {finalDate.toISOString().substring(0, 10)}</Typography>
-          </>
-        )}
-        <IconButton aria-label="delete" color="primary" size="large" onClick={handleOpenModal}>
-          <FilterListIcon />
-        </IconButton>
-      </Grid>
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 800,
-          bgcolor: 'background.paper',
-          border: '2px solid #000',
-          boxShadow: 24,
-          p: 2
-        }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Filtro por fecha
-          </Typography>
-          <Divider/>
-          <Grid container sx={{mt: 2}}>
+      <SideBar />
+      <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
+        <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+          <Grid container sx={{mt: 3, mb: 2}}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Grid item xs={1}>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -336,11 +322,11 @@ export const DashboardScreen = () => {
               <Grid item xs>
               <DatePicker
                 label="Fecha"
-                value={initialDate}
-                onChange={(newValue) => setInitialDate(newValue)}
+                value={startDate}
+                onChange={(newValue) => setStartDate(newValue)}
                 format="DD/MM/YYYY"
                 disableFuture
-                sx={{width: "95%", pr:2}}
+                sx={{width: "50%", pr:2}}
                 />
               </Grid>
               <Grid item xs={1}>
@@ -351,43 +337,18 @@ export const DashboardScreen = () => {
               <Grid item xs>
                 <DatePicker
                   label="Fecha"
-                  value={finalDate}
-                  onChange={(newValue) => setFinalDate(newValue)}
+                  value={endDate}
+                  onChange={(newValue) => setEndDate(newValue)}
                   format="DD/MM/YYYY"
                   disableFuture
-                  sx={{width: "95%", pr:2}}
+                  sx={{width: "50%", pr:2}}
                 />
               </Grid>
             </LocalizationProvider>
-          </Grid>
-          <Box display="flex" justifyContent="flex-end" marginTop={2}>
             <Button variant="contained" size="large" onClick={handleFilter} >
               Filtrar
             </Button>
-          </Box>
-        </Box>
-      </Modal>
-    </>
-    );
-  }
-
-  return (
-    <>
-      <SideBar />
-      <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
-        <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
-          <ModalFilter/>
-            {/*
-            <Grid item style={{ flexGrow: "1" }}>
-              <Typography
-                variant="h3"
-                sx={{ marginRight: 2, marginLeft: 2 }}
-                color="primary"
-              >
-                Métricas
-              </Typography>
-            </Grid>
-            */}
+          </Grid>
           {isLoading && (
             <Box sx={{ display: 'flex', justifyContent: "center", marginTop: 4 }}>
               <CircularProgress color="primary" />
@@ -399,7 +360,7 @@ export const DashboardScreen = () => {
                   <Stack spacing={2} sx={{ width: '100%' }}>
                     <LineChart lineData={complaintData} name={"Cantidad de denuncias en el tiempo"}/>
                     <LineChart lineData={suspendedData} name={"Cantidad de suspensiones en el tiempo"}/>
-                    <DoubleLineChart doubleLineData={lineData}/>
+                    <DoubleLineChart doubleLineData={eventsData}/>
                     <BarChart barData={barData}/>
                   </Stack>
                 </Grid>
