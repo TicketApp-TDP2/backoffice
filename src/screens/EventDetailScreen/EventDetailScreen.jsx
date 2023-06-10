@@ -76,6 +76,10 @@ export function EventDetailScreen() {
   };
 
   useEffect( () => {
+    if (!localStorage.getItem('logged')) {
+      navigate('/');
+      return;
+    }
     async function fetchData() {
       setIsLoading(true);
       getComplaintByEvent(eventId).then((resp) => {
