@@ -8,7 +8,7 @@ export const OrganizersRankingScreen = () => {
       <SideBar />
       <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Grid
+          {/*<Grid
             container
             sx={{ alignItems: "center", padding: 2, minHeight: 40 }}
           >
@@ -21,7 +21,7 @@ export const OrganizersRankingScreen = () => {
                 Ranking de organizadores denunciados
               </Typography>
             </Grid>
-          </Grid>
+          </Grid>*/}
           <OrganizersTable />
         </Box>
       </Box>

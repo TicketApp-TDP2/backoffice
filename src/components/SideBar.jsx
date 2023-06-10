@@ -11,6 +11,7 @@ import {Link as RouterLink, useLocation} from 'react-router-dom';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import {useState} from "react";
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -66,7 +67,13 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function SideBar() {
     const theme = useTheme();
     const {pathname} = useLocation();
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
+
+    const data = [
+      { name: "Métricas", icon: <BarChartIcon />, navigate: '/dashboard' },
+      { name: "Ranking Eventos", icon: <EventNoteIcon />, navigate: '/events' },
+      { name: "Ranking Organizadores", icon: <AccountCircleIcon />, navigate: '/organizers' },
+    ];
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -75,11 +82,6 @@ export default function SideBar() {
     const handleDrawerClose = () => {
         setOpen(false);
     };
-
-    const data = [
-      { name: "Ranking Eventos", icon: <EventNoteIcon />, navigate: '/events' },
-      { name: "Ranking Organizadores", icon: <AccountCircleIcon />, navigate: '/organizers' },
-    ];
 
     const getList = () => (
       <>
@@ -120,6 +122,9 @@ export default function SideBar() {
                       sx={{ mr: 2, ...(open && { display: 'none' }) }}
                   >
                       <MenuIcon />
+                      <Typography variant="h4" ml={3}>
+                          {data.find((d) => pathname.includes(d.navigate)).name}
+                      </Typography>
                   </IconButton>
                   <Box sx={{ ...(open && { right: 0, position: 'fixed', marginRight: 3 }) }}>
                       <img src="/Logo.png" alt="logo" height={50} />

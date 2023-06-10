@@ -21,10 +21,8 @@ export const LandingScreen = () => {
 
     const handleLogIn = async () => {
         setIsLoading(true);
-        console.log("Name", name, "Password", password);
-        if(name === "admin1" && password === "pass1") {
-            navigate("/events");
-            console.log("OK");
+        if (name === "admin1" && password === "pass1") {
+            navigate("/dashboard");
         } else {
             Swal.fire({
                 title: '¡Error!',

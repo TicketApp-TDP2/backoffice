@@ -9,7 +9,7 @@ export const EventsRankingScreen = () => {
       <SideBar />
       <Box sx={{ display: "flex", backgroundColor: "#f3f1fc" }}>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Grid
+            {/*<Grid
             container
             sx={{ alignItems: "center", padding: 2, minHeight: 40 }}
           >
@@ -22,7 +22,7 @@ export const EventsRankingScreen = () => {
                 Ranking de eventos denunciados
               </Typography>
             </Grid>
-          </Grid>
+          </Grid>*/}
           <EventsTable />
         </Box>
       </Box>

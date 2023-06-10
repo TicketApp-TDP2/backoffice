@@ -24,6 +24,8 @@ export const ProfileScreen = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingButton, setIsLoadingButton] = useState(false);
     const [complaints, setComplaints] = useState([]);
+    const [createdEvents, setCreatedEvents] = useState(0);
+    const [publishedEvents, setPublishedEvents] = useState(0);
     const navigate = useNavigate();
     const notificationsContext = useContext(MobileNotificationsContext);
 
@@ -36,6 +38,12 @@ export const ProfileScreen = () => {
         getComplaintByOrganizer(profileId).then((resp) => {
           setComplaints(resp);
           setIsLoading(false);
+        });
+        getEventsByOrganizer(profileId).then((resp) => {
+            const data = resp.data;
+            setCreatedEvents(data.length);
+            const published = data.filter((e) => e.state === 'Publicado');
+            setPublishedEvents(published.length);
         });
       }
       fetchData();
@@ -129,8 +137,8 @@ export const ProfileScreen = () => {
       }
   
   return <>
-    <Box sx={{ display: 'flex' }}>
       <SideBar/>
+    <Box sx={{ display: 'flex' }}>
         <Box
           component="main"
           sx={{ flexGrow: 1, p: 3 }}
@@ -161,10 +169,15 @@ export const ProfileScreen = () => {
                       <Grid item sx={{ paddingTop: 2, width: '80%'}} mt={2}>
                           {organizer.about_me !== "" && (
                             <Paper elevation={10} sx={{ textAlign: 'left', padding: 2}}>
-                                <Typography variant="h5" sx={{marginBottom: 1}}>Sobre mi</Typography>
+                                <Typography variant="h5" sx={{marginBottom: 1}}>Descripción personal</Typography>
                                 <Typography style={{ wordWrap: "break-word" }}>{organizer.about_me}</Typography>
                             </Paper>
                           )}
+                      </Grid>
+                      <Grid mt={8} sx={{width: '80%'}}>
+                          <Typography variant="h6" sx={{marginBottom: 1}}>Email registrado: {organizer.email}</Typography>
+                          <Typography variant="h6" sx={{marginBottom: 1}}>Cantidad de eventos creados: {createdEvents}</Typography>
+                          <Typography variant="h6" sx={{marginBottom: 1}}>Cantidad de eventos publicados: {publishedEvents}</Typography>
                       </Grid>
                       <Grid mt={8} mb={10} sx={{width: '83%'}}>
                         <Typography
