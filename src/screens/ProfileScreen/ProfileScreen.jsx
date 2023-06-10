@@ -30,6 +30,10 @@ export const ProfileScreen = () => {
     const notificationsContext = useContext(MobileNotificationsContext);
 
     useEffect( () => {
+      if (!localStorage.getItem('logged')) {
+        navigate('/');
+        return;
+      }
       async function fetchData() {
         setIsLoading(true);
         getOrganizer(profileId).then((resp) => {

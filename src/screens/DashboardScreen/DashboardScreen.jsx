@@ -18,6 +18,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DoubleLineChart } from '../../components/DoubleLineChart';
+import {useNavigate} from "react-router-dom";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 ChartJS.register(
@@ -124,6 +125,7 @@ export const DashboardScreen = () => {
   const [endDate, setEndDate] = useState(today);
   const [startDateError, setStartDateError] = useState(null);
   const [endDateError, setEndDateError] = useState(null);
+  const navigate = useNavigate();
 
   const errorStartDateMessage = React.useMemo(() => {
     switch (startDateError) {
@@ -302,6 +304,10 @@ export const DashboardScreen = () => {
   }
 
   useEffect(() => {
+    if (!localStorage.getItem('logged')) {
+      navigate('/');
+      return;
+    }
     async function fetchData() {
       setIsLoading(true);
       const start_date = startDate.toISOString().substring(0, 10);

@@ -6,7 +6,6 @@ import { useState } from "react";
 import Swal from 'sweetalert2';
 
 export const LandingScreen = () => {
-
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [name, setName] = useState("");
@@ -22,6 +21,7 @@ export const LandingScreen = () => {
     const handleLogIn = async () => {
         setIsLoading(true);
         if (name === "admin1" && password === "pass1") {
+            localStorage.setItem('logged', true);
             navigate("/dashboard");
         } else {
             Swal.fire({
