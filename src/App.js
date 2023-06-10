@@ -9,11 +9,15 @@ import { OrganizersRankingScreen } from './screens/OrganizersRankingScreen/Organ
 import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { createTheme, ThemeProvider} from '@mui/material/styles';
 import {EventDetailScreen} from "./screens/EventDetailScreen/EventDetailScreen";
+import { DashboardScreen } from './screens/DashboardScreen/DashboardScreen';
 
 const router = createHashRouter([
   {
     path: '/',
     element: <LandingScreen />
+  }, {
+    path: '/dashboard',
+    element: <DashboardScreen />
   }, {
     path: '/events',
     element: <EventsRankingScreen />
@@ -21,11 +25,11 @@ const router = createHashRouter([
     path: '/events/:eventId',
     element: <EventDetailScreen />
   }, {
-    path: '/profile/:profileId',
+    path: '/organizers/:profileId',
     element: <ProfileScreen />
   }, {
     path: '/organizers',
-    element: <OrganizersRankingScreen />
+    element: <OrganizersRankingScreen/>
   }
 ]);
 
