@@ -129,8 +129,8 @@ export const ProfileScreen = () => {
       }
   
   return <>
-    <Box sx={{ display: 'flex' }}>
       <SideBar/>
+    <Box sx={{ display: 'flex' }}>
         <Box
           component="main"
           sx={{ flexGrow: 1, p: 3 }}

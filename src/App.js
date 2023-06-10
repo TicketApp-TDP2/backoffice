@@ -25,7 +25,7 @@ const router = createHashRouter([
     path: '/events/:eventId',
     element: <EventDetailScreen />
   }, {
-    path: '/profile/:profileId',
+    path: '/organizers/:profileId',
     element: <ProfileScreen />
   }, {
     path: '/organizers',

@@ -70,7 +70,7 @@ export const TopOrganizersTable = (props) => {
                       <TableCell sx={{padding: 0}}>
                           <Button
                           onClick={() => {
-                              navigate(`/profile/${row.id}`);
+                              navigate(`/organizers/${row.id}`);
                           }}
                           underline="hover"
                           sx={{fontSize: 14}}

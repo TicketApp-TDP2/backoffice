@@ -123,7 +123,7 @@ export default function SideBar() {
                   >
                       <MenuIcon />
                       <Typography variant="h4" ml={3}>
-                          {data.find((d) => d.navigate === pathname).name}
+                          {data.find((d) => pathname.includes(d.navigate)).name}
                       </Typography>
                   </IconButton>
                   <Box sx={{ ...(open && { right: 0, position: 'fixed', marginRight: 3 }) }}>

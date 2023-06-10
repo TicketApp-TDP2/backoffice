@@ -282,7 +282,7 @@ export const OrganizersTable = () => {
                 <TableCell sx={{ fontWeight: "bold" }}>
                     <Button
                     onClick={() => {
-                        navigate(`/profile/${row.organizer_id}`);
+                        navigate(`/organizers/${row.organizer_id}`);
                     }}
                     underline="hover"
                     >
