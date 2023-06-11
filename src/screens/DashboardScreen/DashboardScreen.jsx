@@ -86,8 +86,8 @@ const defaultLineData = {
     {
       label: 'Cantidad de eventos',
       data: [3, 23, 42, 45, 53, 55, 63, 67, 73, 79, 85, 90],
-      borderColor: 'rgba(54, 162, 235, 1)',
-      backgroundColor: 'rgba(54, 162, 235, 1)',
+      borderColor: 'rgb(136, 136, 132, 1)',
+      backgroundColor: 'rgba(136, 136, 132, 1)',
     },
     {
       label: 'Cantidad de eventos publicados',
@@ -111,6 +111,7 @@ const defaultBarData = {
 
 const today = dayjs();
 const lastyear = today.subtract(1, 'year');
+const start_year = today.startOf('year');
 const yesterday = dayjs().subtract(1, 'day');
 
 export const DashboardScreen = () => {
@@ -121,7 +122,7 @@ export const DashboardScreen = () => {
   const [eventsData, setEventsData] = useState(defaultLineData);
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState([]);
-  const [startDate, setStartDate] = useState(lastyear);
+  const [startDate, setStartDate] = useState(start_year);
   const [endDate, setEndDate] = useState(today);
   const [startDateError, setStartDateError] = useState(null);
   const [endDateError, setEndDateError] = useState(null);
@@ -150,6 +151,8 @@ export const DashboardScreen = () => {
         return 'La fecha de fin no puede ser menor a la fecha de inicio';
       case 'maxDate':
         return 'La fecha de fin no puede ser mayor a la fecha de hoy';
+      case 'disableFuture':
+          return 'La fecha de fin no puede ser mayor a la fecha de hoy';
       case 'invalidDate': {
         return 'La fecha es inválida';
       }
@@ -190,33 +193,31 @@ export const DashboardScreen = () => {
   function setPieChartData(res) {
     const newData = [];
     const values = [];
-    values.push(res.data.event_states["Borrador"]);
-    values.push(res.data.event_states["Publicado"]);
-    values.push(res.data.event_states["Finalizado"]);
-    values.push(res.data.event_states["Cancelado"]);
-    values.push(res.data.event_states["Suspendido"]);
+    values.push(Math.round(res.data.event_states["Borrador"] * 10) / 10);
+    values.push(Math.round(res.data.event_states["Publicado"] * 10) / 10);
+    values.push(Math.round(res.data.event_states["Finalizado"] * 10) / 10);
+    values.push(Math.round(res.data.event_states["Cancelado"] * 10) / 10);
+    values.push(Math.round(res.data.event_states["Suspendido"] * 10) / 10);
     let sum = values.reduce(function(a, b){
       return a + b;
     });
     if (sum === 0) {
-      console.log("newData vacio", newData);
       setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
     }
     else {
-      newData.push(res.data.event_states["Borrador"]);
-      newData.push(res.data.event_states["Publicado"]);
-      newData.push(res.data.event_states["Finalizado"]);
-      newData.push(res.data.event_states["Cancelado"]);
-      newData.push(res.data.event_states["Suspendido"]);
+      newData.push(Math.round(res.data.event_states["Borrador"] * 10) / 10);
+      newData.push(Math.round(res.data.event_states["Publicado"] * 10) / 10);
+      newData.push(Math.round(res.data.event_states["Finalizado"] * 10) / 10);
+      newData.push(Math.round(res.data.event_states["Cancelado"] * 10) / 10);
+      newData.push(Math.round(res.data.event_states["Suspendido"] * 10) / 10);
 
       setPieData({...pieData, datasets: [{...pieData.datasets[0], data: newData}]});
     }
   }
 
   function setBarChartData(res, start_date, end_date) {
-    const months = dayjs(end_date).diff(start_date, 'month');
-    const newData = Array(months + 1).fill(0);
     const dates = dateRange(start_date, end_date);
+    const newData = Array(dates.length).fill(0);
     const newLabels = [];
     dates.forEach(date => {
       const month = date.split("-")[1];
@@ -235,9 +236,8 @@ export const DashboardScreen = () => {
   }
 
   function setSuspendedChartData(res, start_date, end_date) {
-    const months = dayjs(end_date).diff(start_date, 'month');
-    const newData = Array(months + 1).fill(0);
     const dates = dateRange(start_date, end_date);
+    const newData = Array(dates.length).fill(0);
     const newLabels = [];
     dates.forEach(date => {
       const month = date.split("-")[1];
@@ -256,9 +256,8 @@ export const DashboardScreen = () => {
   }
 
   function setComplaintChartData(res, start_date, end_date) {
-    const months = dayjs(end_date).diff(start_date, 'month');
-    const newData = Array(months + 1).fill(0);
     const dates = dateRange(start_date, end_date);
+    const newData = Array(dates.length).fill(0);
     const newLabels = [];
     dates.forEach(date => {
       const month = date.split("-")[1];
@@ -272,15 +271,13 @@ export const DashboardScreen = () => {
         }
       });
     });
-
     setComplaintData({...complaintData, labels: newLabels, datasets: [{...complaintData.datasets[0], data: newData}]});
   }
 
   function setEventsChartData(res, start_date, end_date) {
-    const months = dayjs(end_date).diff(start_date, 'month');
-    const newEventsData = Array(months + 1).fill(0);
-    const newEventsPublishedData = Array(months + 1).fill(0);
     const dates = dateRange(start_date, end_date);
+    const newEventsData = Array(dates.length).fill(0);
+    const newEventsPublishedData = Array(dates.length).fill(0);
     const newLabels = [];
     dates.forEach(date => {
       const month = date.split("-")[1];
@@ -313,6 +310,7 @@ export const DashboardScreen = () => {
       const start_date = startDate.toISOString().substring(0, 10);
       const end_date = endDate.toISOString().substring(0, 10);
       getStats({ start_date, end_date }).then((res) => {
+        console.log("respuesta", res);
         setPieChartData(res);
         setRows(res.data.top_organizers);
         setBarChartData(res, start_date, end_date);
@@ -330,6 +328,7 @@ export const DashboardScreen = () => {
     const start_date = startDate.toISOString().substring(0, 10);
     const end_date = endDate.toISOString().substring(0, 10);
     getStats({ start_date, end_date }).then((res) => {
+      console.log("respuesta", res);
       setPieChartData(res);
       setRows(res.data.top_organizers);
       setBarChartData(res, start_date, end_date);
@@ -354,7 +353,7 @@ export const DashboardScreen = () => {
               </Grid>*/}
               <Grid item sx={{width: '15%', mr: 1, justifyContent: 'center'}}>
                 <DatePicker
-                  label="Fecha desde"
+                  label="Desde"
                   value={startDate}
                   disableFuture
                   onChange={(newValue) => setStartDate(newValue)}
@@ -379,7 +378,7 @@ export const DashboardScreen = () => {
               }
               <Grid item sx={{width: '15%', ml: 1}}>
                 <DatePicker
-                  label="Fecha hasta"
+                  label="Hasta"
                   value={endDate}
                   onChange={(newValue) => setEndDate(newValue)}
                   format="DD/MM/YYYY"
