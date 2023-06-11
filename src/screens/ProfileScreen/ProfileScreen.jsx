@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
 import { ProfileState } from '../../components/ProfileState';
-import {getEventsByOrganizer, getUsersEnrolled} from "../../services/eventService";
+import {getEvents, getEventsByOrganizer, getUsersEnrolled} from "../../services/eventService";
 import {
     cancelScheduledNotificationsForEvent,
     rescheduleNotificationsForEvent,
@@ -43,11 +43,23 @@ export const ProfileScreen = () => {
           setComplaints(resp);
           setIsLoading(false);
         });
-        getEventsByOrganizer(profileId).then((resp) => {
+        getEvents().then((resp) => {
             const data = resp.data;
-            setCreatedEvents(data.length);
+            let createdEvent = 0;
+            let publishedEvent = 0;
+            data.forEach((event) => {
+              if (event.organizer === profileId) {
+                createdEvent = createdEvent + 1;
+                setCreatedEvents(createdEvent);
+                if (event.state === 'Publicado') {
+                  publishedEvent = publishedEvent + 1;
+                  setPublishedEvents(publishedEvent);
+                }
+              }
+            });
+            /*setCreatedEvents(data.length);
             const published = data.filter((e) => e.state === 'Publicado');
-            setPublishedEvents(published.length);
+            setPublishedEvents(published.length);*/
         });
       }
       fetchData();
