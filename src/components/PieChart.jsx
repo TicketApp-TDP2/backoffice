@@ -6,11 +6,11 @@ export const PieChart = (props) => {
     const { pieData } = props;
     const total = pieData.datasets[0].data.slice(0,5).reduce((acc, current) => acc + current, 0);
     const states = {
-        borrador: pieData.datasets[0].data[0]/total*100,
-        publicado: pieData.datasets[0].data[1]/total*100,
-        finalizado: pieData.datasets[0].data[2]/total*100,
-        cancelado: pieData.datasets[0].data[3]/total*100,
-        suspendido: pieData.datasets[0].data[4]/total*100
+        borrador: Math.round(pieData.datasets[0].data[0]/total*100 * 10) / 10,
+        publicado: Math.round(pieData.datasets[0].data[1]/total*100 * 10) / 10,
+        finalizado: Math.round(pieData.datasets[0].data[2]/total*100 * 10) / 10,
+        cancelado: Math.round(pieData.datasets[0].data[3]/total*100 * 10) / 10,
+        suspendido: Math.round(pieData.datasets[0].data[4]/total*100 * 10) / 10
     }
 
     return (
